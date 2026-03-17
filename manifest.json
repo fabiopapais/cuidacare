@@ -2,7 +2,7 @@
   "name": "CuidaCare – Controle de Plantões",
   "short_name": "CuidaCare",
   "description": "Controle de plantões, medicamentos e cuidados ao paciente",
-  "start_url": "/index.html",
+  "start_url": "/cuidacare/index.html",
   "display": "standalone",
   "background_color": "#1E1A14",
   "theme_color": "#1D7A73",
