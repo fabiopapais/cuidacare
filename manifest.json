@@ -1,0 +1,31 @@
+{
+  "name": "CuidaCare – Controle de Plantões",
+  "short_name": "CuidaCare",
+  "description": "Controle de plantões, medicamentos e cuidados ao paciente",
+  "start_url": "/index.html",
+  "display": "standalone",
+  "background_color": "#1E1A14",
+  "theme_color": "#1D7A73",
+  "orientation": "portrait",
+  "lang": "pt-BR",
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ],
+  "categories": ["health", "medical", "productivity"]
+}
