@@ -291,6 +291,43 @@ textarea{resize:vertical;min-height:72px;font-weight:400}
 .manual-sec{font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:16px 0 8px;display:flex;align-items:center;gap:8px}
 .manual-sec::after{content:'';flex:1;height:1px;background:var(--border)}
 
+/* ── DASHBOARD ── */
+.dash-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.dash-card{background:var(--surface);border-radius:var(--r);padding:14px 12px;border:1.5px solid var(--border);box-shadow:var(--shadow);position:relative;overflow:hidden}
+.dash-card::before{content:'';position:absolute;top:-16px;right:-16px;width:60px;height:60px;border-radius:50%;opacity:.07}
+.dash-card.amber::before{background:var(--amber)}
+.dash-card.rose::before{background:var(--rose)}
+.dash-card.blue::before{background:var(--blue)}
+.dash-card.teal::before{background:var(--teal)}
+.dash-card.green::before{background:var(--green)}
+.dash-card.purple::before{background:#7C5CA0}
+.dash-ico{font-size:1.2rem;margin-bottom:6px;display:block}
+.dash-val{font-size:1.5rem;font-weight:900;line-height:1;display:block;margin-bottom:3px}
+.dash-lbl{font-size:.65rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);display:block}
+.dash-sub{font-size:.68rem;color:var(--muted);margin-top:3px;display:block}
+.dash-val.bad{color:var(--rose)}
+.dash-val.warn{color:var(--amber)}
+.dash-val.ok{color:var(--green)}
+.dash-val.neutral{color:var(--teal)}
+.dash-full{grid-column:1/-1}
+
+/* Barra de progresso inline */
+.dash-bar{height:4px;background:var(--border);border-radius:2px;margin-top:8px;overflow:hidden}
+.dash-bar-fill{height:100%;border-radius:2px;transition:.4s}
+
+/* Status badge */
+.dash-badge{display:inline-flex;align-items:center;gap:4px;background:var(--green-bg);color:var(--green);border-radius:20px;padding:3px 10px;font-size:.68rem;font-weight:800;margin-bottom:8px}
+.dash-badge.warn{background:var(--amber-bg);color:var(--amber)}
+.dash-badge.off{background:var(--surface2);color:var(--muted)}
+
+/* Card wide com linha de status */
+.dash-wide{background:var(--surface);border-radius:var(--r);padding:14px 16px;border:1.5px solid var(--border);box-shadow:var(--shadow);margin-bottom:10px;display:flex;align-items:center;gap:14px}
+.dash-wide-ico{font-size:1.8rem;flex-shrink:0}
+.dash-wide-body{flex:1;min-width:0}
+.dash-wide-title{font-size:.9rem;font-weight:800;color:var(--text);margin-bottom:2px}
+.dash-wide-sub{font-size:.75rem;color:var(--muted);line-height:1.4}
+.dash-wide-val{font-size:1.2rem;font-weight:900;color:var(--teal);flex-shrink:0}
+
 /* ── MODO NOTURNO ── */
 body.noturno{--bg:#0f1410;--surface:#1a1f1a;--surface2:#222820;--border:#2a3028;--text:#e8ede8;--muted:#6a7868}
 body.noturno .header{background:#0a0f0a}
@@ -368,6 +405,7 @@ body.noturno .lembretes-card{background:#1a1f1a;border-color:#2a3028}
 <div id="page-plantao" class="page on">
 
   <!-- SOS BUTTON -->
+  <button id="resumo-btn" onclick="resumoRapido()" title="Resumo rápido" style="position:fixed;bottom:158px;right:16px;width:52px;height:52px;border-radius:50%;background:var(--teal);color:#fff;border:none;font-size:1.3rem;cursor:pointer;box-shadow:0 4px 16px rgba(29,122,115,.4);z-index:150;display:none;align-items:center;justify-content:center">📋</button>
   <button class="sos-btn" id="sos-btn" onclick="abrirSOS()">🆘<span class="sos-txt">SOS</span></button>
 
   <!-- MODAL SOS -->
@@ -396,14 +434,70 @@ body.noturno .lembretes-card{background:#1a1f1a;border-color:#2a3028}
 
   <!-- Banner do plantão ativo -->
   <div class="shift-banner" id="shift-banner">
-    <div class="sb-label">Plantão Atual</div>
-    <div class="sb-name" id="sb-name">Nenhum plantão ativo</div>
-    <div class="sb-sub" id="sb-sub">Inicie um plantão abaixo</div>
-    <div class="shift-stats">
-      <div class="shift-stat"><div class="sv" id="sb-glicose">–</div><div class="sk">Última Glicose</div></div>
-      <div class="shift-stat"><div class="sv" id="sb-pressao">–</div><div class="sk">Última Pressão</div></div>
-      <div class="shift-stat"><div class="sv" id="sb-temp">–</div><div class="sk">Última Temp.</div></div>
-      <div class="shift-stat"><div class="sv" id="sb-regs">0</div><div class="sk">📋 Registros</div></div>
+
+    <!-- Linha de status: badge + nome + timer -->
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px;gap:8px">
+      <div style="flex:1;min-width:0">
+        <div id="dash-badge" style="display:inline-flex;align-items:center;gap:4px;background:rgba(255,255,255,.12);border-radius:20px;padding:3px 10px;font-size:.68rem;font-weight:800;color:#a0d0cc;margin-bottom:6px">⚫ Sem plantão ativo</div>
+        <div class="sb-name" id="sb-name" style="font-family:Lora,serif;font-size:1.15rem;font-weight:600;color:#fff;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Nenhum plantão ativo</div>
+        <div class="sb-sub" id="sb-sub" style="font-size:.73rem;color:#80c8c3;margin-top:3px">Inicie um plantão abaixo</div>
+      </div>
+      <div id="dash-timer" style="text-align:right;flex-shrink:0;display:none">
+        <div id="dash-duracao" style="font-size:1.5rem;font-weight:900;color:#fff;line-height:1">0h00</div>
+        <div style="font-size:.6rem;color:#80c8c3;text-transform:uppercase;letter-spacing:.07em;margin-top:1px">Duração</div>
+      </div>
+    </div>
+
+    <!-- Grid de vitais 2x2 -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+      <div style="background:rgba(255,255,255,.08);border-radius:10px;padding:10px 12px;border:1px solid rgba(255,255,255,.1)">
+        <div style="font-size:.9rem;margin-bottom:4px">🩸</div>
+        <div id="dv-glicose" style="font-size:1.15rem;font-weight:900;color:#fff;line-height:1">–</div>
+        <div style="font-size:.62rem;text-transform:uppercase;letter-spacing:.06em;color:#80c8c3;margin-top:2px">Glicemia</div>
+        <div id="ds-glicose" style="font-size:.65rem;color:#a0d0cc;margin-top:1px">Não aferida</div>
+      </div>
+      <div style="background:rgba(255,255,255,.08);border-radius:10px;padding:10px 12px;border:1px solid rgba(255,255,255,.1)">
+        <div style="font-size:.9rem;margin-bottom:4px">💓</div>
+        <div id="dv-pressao" style="font-size:1.15rem;font-weight:900;color:#fff;line-height:1">–</div>
+        <div style="font-size:.62rem;text-transform:uppercase;letter-spacing:.06em;color:#80c8c3;margin-top:2px">Pressão</div>
+        <div id="ds-pressao" style="font-size:.65rem;color:#a0d0cc;margin-top:1px">Não aferida</div>
+      </div>
+      <div style="background:rgba(255,255,255,.08);border-radius:10px;padding:10px 12px;border:1px solid rgba(255,255,255,.1)">
+        <div style="font-size:.9rem;margin-bottom:4px">🌡️</div>
+        <div id="dv-temp" style="font-size:1.15rem;font-weight:900;color:#fff;line-height:1">–</div>
+        <div style="font-size:.62rem;text-transform:uppercase;letter-spacing:.06em;color:#80c8c3;margin-top:2px">Temperatura</div>
+        <div id="ds-temp" style="font-size:.65rem;color:#a0d0cc;margin-top:1px">Não aferida</div>
+      </div>
+      <div style="background:rgba(255,255,255,.08);border-radius:10px;padding:10px 12px;border:1px solid rgba(255,255,255,.1)">
+        <div style="font-size:.9rem;margin-bottom:4px">🫁</div>
+        <div id="dv-oxig" style="font-size:1.15rem;font-weight:900;color:#fff;line-height:1">–</div>
+        <div style="font-size:.62rem;text-transform:uppercase;letter-spacing:.06em;color:#80c8c3;margin-top:2px">Oxigenação</div>
+        <div id="ds-oxig" style="font-size:.65rem;color:#a0d0cc;margin-top:1px">Não aferida</div>
+      </div>
+    </div>
+
+    <!-- Barra progresso rotina + contadores -->
+    <!-- Alerta escara -->
+    <div id="dash-escara-alerta" style="display:none;background:rgba(181,74,74,.25);border:1px solid rgba(181,74,74,.4);border-radius:8px;padding:7px 12px;font-size:.75rem;font-weight:700;color:#ffaaaa;margin-bottom:8px"></div>
+
+    <div id="dash-progresso" style="display:none">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+        <span style="font-size:.65rem;font-weight:700;color:#a0d0cc;text-transform:uppercase;letter-spacing:.07em">✅ Rotina</span>
+        <span id="dash-prog-txt" style="font-size:.72rem;font-weight:900;color:#fff">0/13</span>
+      </div>
+      <div style="height:5px;background:rgba(255,255,255,.15);border-radius:3px;overflow:hidden;margin-bottom:6px">
+        <div id="dash-prog-fill" style="height:100%;border-radius:3px;background:#4DD4CC;transition:.4s;width:0%"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between">
+        <span id="dash-regs-txt" style="font-size:.67rem;color:#80c8c3">0 registros</span>
+        <span id="dash-meds-txt" style="font-size:.67rem;color:#80c8c3">Remédios: –</span>
+      </div>
+    </div>
+
+    <!-- IDs legados para compatibilidade com renderBanner -->
+    <div style="display:none">
+      <span id="sb-glicose"></span><span id="sb-pressao"></span>
+      <span id="sb-temp"></span><span id="sb-regs">0</span>
     </div>
   </div>
 
@@ -455,6 +549,11 @@ body.noturno .lembretes-card{background:#1a1f1a;border-color:#2a3028}
           <span class="estado-lbl">🌡️ Temp.</span>
           <div class="estado-hora" id="eh-temp"></div>
         </div>
+        <div class="estado-item" id="estado-oxigenacao" style="grid-column:1/-1">
+          <span class="estado-val" id="ev-oxigenacao">–</span>
+          <span class="estado-lbl">🫁 Oxigenação SpO₂</span>
+          <div class="estado-hora" id="eh-oxigenacao"></div>
+        </div>
       </div>
     </div>
 
@@ -489,6 +588,21 @@ body.noturno .lembretes-card{background:#1a1f1a;border-color:#2a3028}
         <span class="qb-icon">📝</span>
         <span class="qb-label">Ocorrência</span>
         <span class="qb-last">Anotar</span>
+      </button>
+      <button class="quick-btn teal" onclick="abrirModal('modal-peso-diurese')">
+        <span class="qb-icon">⚖️</span>
+        <span class="qb-label">Peso/Diurese</span>
+        <span class="qb-last" id="ql-peso">Registrar</span>
+      </button>
+      <button class="quick-btn green" onclick="abrirModal('modal-escara')">
+        <span class="qb-icon">🩹</span>
+        <span class="qb-label">Escara/Curativo</span>
+        <span class="qb-last" id="ql-escara">Avaliar</span>
+      </button>
+      <button class="quick-btn blue" onclick="abrirModal('modal-oxigenacao')">
+        <span class="qb-icon">🫁</span>
+        <span class="qb-label">Oxigenação</span>
+        <span class="qb-last" id="ql-oxigenacao">–</span>
       </button>
     </div>
 
@@ -581,6 +695,15 @@ body.noturno .lembretes-card{background:#1a1f1a;border-color:#2a3028}
         <button class="pill" onclick="selPill(this,'pills-med-tipo')">Curativo / Tópico</button>
       </div>
     </div>
+    <div class="field">
+      <label>⚠️ Não dar se pressão sistólica estiver abaixo de (mmHg)</label>
+      <div style="display:flex;align-items:center;gap:10px">
+        <input id="med-pressao-min" type="number" placeholder="Ex: 110" inputmode="decimal" min="60" max="200"
+          style="flex:1;padding:10px 14px;border:2px solid var(--border);border-radius:10px;font-family:Nunito,sans-serif;font-size:1rem;background:var(--bg);color:var(--text)">
+        <span style="font-size:.78rem;color:var(--muted);white-space:nowrap">mmHg (opcional)</span>
+      </div>
+      <div style="font-size:.73rem;color:var(--amber);margin-top:5px;line-height:1.5">⚠️ Se preenchido, o app bloqueia e alerta a cuidadora quando a pressão estiver abaixo deste valor.</div>
+    </div>
     <button class="btn btn-primary btn-sm" onclick="addRemedio()">+ Cadastrar Remédio</button>
   </div>
 
@@ -590,7 +713,13 @@ body.noturno .lembretes-card{background:#1a1f1a;border-color:#2a3028}
 <div id="page-registros" class="page">
   <div class="card">
     <div class="card-head"><div class="card-icon" style="background:var(--teal-bg)">📋</div><div class="card-title">Histórico de Registros</div></div>
-    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">
+    <div style="position:relative;margin-bottom:12px">
+      <input id="busca-reg" type="text" placeholder="🔍 Buscar por valor, nome, data, cuidadora..." 
+        style="width:100%;padding:10px 14px 10px 14px;border:1.5px solid var(--border);border-radius:10px;font-family:Nunito,sans-serif;font-size:.85rem;background:var(--bg);color:var(--text)"
+        oninput="filtrarBusca(this.value)">
+      <button id="busca-limpar" onclick="limparBusca()" style="display:none;position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--muted);font-size:1rem">✕</button>
+    </div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px" id="filtros-reg">
       <button class="pill on" onclick="filtrar('todos',this)">Todos</button>
       <button class="pill" style="border-color:var(--teal)" onclick="filtrar('atual',this)">📌 Plantão atual</button>
       <button class="pill" onclick="filtrar('glicose',this)">🩸 Glicose</button>
@@ -599,8 +728,11 @@ body.noturno .lembretes-card{background:#1a1f1a;border-color:#2a3028}
       <button class="pill" onclick="filtrar('refeicao',this)">🍽️ Refeição</button>
       <button class="pill" onclick="filtrar('medicamento',this)">💊 Remédio</button>
       <button class="pill" onclick="filtrar('nota',this)">📝 Nota</button>
+      <button class="pill" onclick="filtrar('peso_diurese',this)">⚖️ Peso/Diurese</button>
+      <button class="pill" onclick="filtrar('oxigenacao',this)">🫁 Oxigenação</button>
+      <button class="pill" onclick="filtrar('escara',this)">🩹 Escara/Curativo</button>
     </div>
-    <div id="lista-regs"><div class="empty"><div class="ei">📭</div><p>Nenhum registro ainda.</p></div></div>
+    <div id="lista-regs" style="max-height:60vh;overflow-y:auto"><div class="empty"><div class="ei">📭</div><p>Nenhum registro ainda.</p></div></div>
   </div>
 </div>
 
@@ -769,6 +901,23 @@ body.noturno .lembretes-card{background:#1a1f1a;border-color:#2a3028}
     </div>
   </div>
 
+  <!-- BACKUP E SEGURANÇA DOS DADOS -->
+  <div class="card" style="border:2px solid var(--blue)">
+    <div class="card-head"><div class="card-icon" style="background:var(--blue-bg)">💾</div><div class="card-title">Backup e Segurança</div></div>
+    <p style="font-size:.82rem;color:var(--muted);margin-bottom:14px;line-height:1.5">Exporte todos os dados para um arquivo de backup. <strong>Guarde o backup antes de qualquer atualização do app.</strong></p>
+    <div style="background:var(--blue-bg);border-radius:10px;padding:12px;margin-bottom:14px;font-size:.78rem;color:var(--blue);line-height:1.6;font-weight:600">
+      ✅ <strong>Atualizar o app NÃO apaga os dados.</strong><br>
+      ⚠️ <strong>Desinstalar o app PODE apagar os dados.</strong><br>
+      💡 Nunca desinstale — só atualize substituindo o arquivo.
+    </div>
+    <div style="display:flex;gap:9px;flex-wrap:wrap;margin-bottom:8px">
+      <button class="btn btn-blue" style="flex:1" onclick="exportarBackup()">⬇️ Exportar Backup</button>
+      <button class="btn btn-ghost" style="flex:1" onclick="document.getElementById('importar-backup').click()">⬆️ Importar Backup</button>
+    </div>
+    <input type="file" id="importar-backup" accept=".json" style="display:none" onchange="importarBackup(this)">
+    <div id="backup-info" style="font-size:.72rem;color:var(--muted);text-align:center"></div>
+  </div>
+
   <div class="card" style="border:2px solid var(--rose)">
     <div class="card-head"><div class="card-icon" style="background:var(--rose-bg)">🗑</div><div class="card-title" style="color:var(--rose)">Limpar Dados</div></div>
     <p style="font-size:.82rem;color:var(--muted);margin-bottom:10px;line-height:1.5">Apaga <strong>todo o histórico</strong> acumulado. Configurações e medicamentos são mantidos. Use apenas se quiser recomeçar do zero.</p>
@@ -934,6 +1083,133 @@ body.noturno .lembretes-card{background:#1a1f1a;border-color:#2a3028}
   </div>
 </div>
 
+<!-- ═══ MODAL PESO/DIURESE ═══ -->
+<div class="overlay" id="modal-peso-diurese" onclick="fecharFora(event,'modal-peso-diurese')">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title">⚖️ Peso e Diurese</div>
+      <button class="modal-close" onclick="fechar('modal-peso-diurese')">✕</button>
+    </div>
+    <div class="grid2">
+      <div class="field">
+        <label>⚖️ Peso (kg)</label>
+        <input id="m-peso" type="number" placeholder="65.5" step="0.1" inputmode="decimal" pattern="[0-9,.]*" class="big-input" style="font-size:1.8rem!important;padding:14px 10px!important">
+      </div>
+      <div class="field">
+        <label>💧 Diurese (ml)</label>
+        <input id="m-diurese" type="number" placeholder="300" inputmode="decimal" pattern="[0-9]*" class="big-input" style="font-size:1.8rem!important;padding:14px 10px!important">
+      </div>
+    </div>
+    <div class="grid2">
+      <div class="field">
+        <label>🚽 Evacuação</label>
+        <div class="pills" id="pills-evacuacao">
+          <button class="pill on" onclick="selPill(this,'pills-evacuacao')">Não</button>
+          <button class="pill" onclick="selPill(this,'pills-evacuacao')">Sim</button>
+        </div>
+      </div>
+      <div class="field">
+        <label>💧 Aspecto urina</label>
+        <div class="pills" id="pills-urina">
+          <button class="pill on" onclick="selPill(this,'pills-urina')">Normal</button>
+          <button class="pill" onclick="selPill(this,'pills-urina')">Escura</button>
+          <button class="pill" onclick="selPill(this,'pills-urina')">Com sangue</button>
+        </div>
+      </div>
+    </div>
+    <div class="field">
+      <label>Observações</label>
+      <textarea id="m-peso-obs" placeholder="Observações adicionais…" style="min-height:60px"></textarea>
+    </div>
+    <button class="btn btn-primary btn-full btn-lg" onclick="salvarPesoDiurese()">✅ Salvar Registro</button>
+  </div>
+</div>
+
+<!-- ═══ MODAL OXIGENAÇÃO ═══ -->
+<div class="overlay" id="modal-oxigenacao" onclick="fecharFora(event,'modal-oxigenacao')">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title">🫁 Oxigenação (SpO₂)</div>
+      <button class="modal-close" onclick="fechar('modal-oxigenacao')">✕</button>
+    </div>
+    <div class="field">
+      <label>Saturação de oxigênio (%)</label>
+      <div class="big-input-wrap">
+        <input class="big-input" id="m-oxigenacao" type="number" placeholder="98" min="50" max="100" inputmode="decimal" pattern="[0-9]*" oninput="colorirOxigenacao()">
+        <span class="big-unit">%</span>
+      </div>
+      <div class="ref-range" id="ref-oxigenacao">Referência: <span style="color:var(--green);font-weight:700">acima de 94%</span> — abaixo de 90% = emergência</div>
+    </div>
+    <div class="field">
+      <label>Suplementação de O₂?</label>
+      <div class="pills" id="pills-o2-supl">
+        <button class="pill on" onclick="selPill(this,'pills-o2-supl')">Não (ar ambiente)</button>
+        <button class="pill" onclick="selPill(this,'pills-o2-supl')">Sim — cateter nasal</button>
+        <button class="pill" onclick="selPill(this,'pills-o2-supl')">Sim — máscara</button>
+      </div>
+    </div>
+    <div class="field">
+      <label>Observações</label>
+      <textarea id="m-oxigenacao-obs" placeholder="Ex: paciente agitado durante medição, dificuldade respiratória…" style="min-height:60px"></textarea>
+    </div>
+    <button class="btn btn-blue btn-full btn-lg" onclick="salvarOxigenacao()">✅ Salvar Oxigenação</button>
+  </div>
+</div>
+
+<!-- ═══ MODAL ESCARA/CURATIVO ═══ -->
+<div class="overlay" id="modal-escara" onclick="fecharFora(event,'modal-escara')">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title">🩹 Curativo / Avaliação de Escara</div>
+      <button class="modal-close" onclick="fechar('modal-escara')">✕</button>
+    </div>
+
+    <div style="background:var(--amber-bg);border-left:3px solid var(--amber);border-radius:10px;padding:10px 14px;margin-bottom:14px;font-size:.8rem;color:var(--amber);font-weight:700;line-height:1.5">
+      ⚠️ Avaliar a pele a cada plantão. Registrar qualquer vermelhidão, ferida ou piora imediatamente.
+    </div>
+
+    <div class="field">
+      <label>Local do curativo / lesão</label>
+      <div class="pills" id="pills-escara-local">
+        <button class="pill on" onclick="selPill(this,'pills-escara-local')">Sacral (bumbum)</button>
+        <button class="pill" onclick="selPill(this,'pills-escara-local')">Calcâneo (calcanhar)</button>
+        <button class="pill" onclick="selPill(this,'pills-escara-local')">Trocânter (quadril)</button>
+        <button class="pill" onclick="selPill(this,'pills-escara-local')">Cotovelo</button>
+        <button class="pill" onclick="selPill(this,'pills-escara-local')">Outro</button>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Estado da pele</label>
+      <div class="pills" id="pills-escara-estado">
+        <button class="pill on" onclick="selPill(this,'pills-escara-estado')">✅ Íntegra</button>
+        <button class="pill" onclick="selPill(this,'pills-escara-estado')">🟡 Hiperemia (vermelhidão)</button>
+        <button class="pill" onclick="selPill(this,'pills-escara-estado')">🟠 Bolha/Flictena</button>
+        <button class="pill" onclick="selPill(this,'pills-escara-estado')">🔴 Ferida aberta</button>
+        <button class="pill" onclick="selPill(this,'pills-escara-estado')">⚫ Tecido necrótico</button>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Curativo realizado</label>
+      <div class="pills" id="pills-escara-curativo">
+        <button class="pill on" onclick="selPill(this,'pills-escara-curativo')">Limpeza com soro</button>
+        <button class="pill" onclick="selPill(this,'pills-escara-curativo')">Curativo simples</button>
+        <button class="pill" onclick="selPill(this,'pills-escara-curativo')">Curativo com cobertura</button>
+        <button class="pill" onclick="selPill(this,'pills-escara-curativo')">Só avaliação</button>
+        <button class="pill" onclick="selPill(this,'pills-escara-curativo')">Não realizado</button>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Observações</label>
+      <textarea id="m-escara-obs" placeholder="Descreva: tamanho, aspecto, secreção, odor, evolução desde o último plantão…" style="min-height:80px"></textarea>
+    </div>
+
+    <button class="btn btn-primary btn-full btn-lg" onclick="salvarEscara()">✅ Salvar Avaliação</button>
+  </div>
+</div>
+
 <!-- ═══ MODAL MENSAGEM ADMIN ═══ -->
 <div class="overlay" id="modal-msg-admin" onclick="fecharFora(event,'modal-msg-admin')">
   <div class="modal">
@@ -998,9 +1274,10 @@ body.noturno .lembretes-card{background:#1a1f1a;border-color:#2a3028}
       <button class="manual-tab" onclick="verCapitulo(1,this)">🌅 Plantão</button>
       <button class="manual-tab" onclick="verCapitulo(2,this)">💊 Remédios</button>
       <button class="manual-tab" onclick="verCapitulo(3,this)">✅ Rotina</button>
-      <button class="manual-tab" onclick="verCapitulo(4,this)">📊 Relatórios</button>
-      <button class="manual-tab" onclick="verCapitulo(5,this)">🆘 Emergência</button>
-      <button class="manual-tab" onclick="verCapitulo(6,this)">💡 Dicas</button>
+      <button class="manual-tab" onclick="verCapitulo(4,this)">⚖️ Peso/Diurese</button>
+      <button class="manual-tab" onclick="verCapitulo(5,this)">📊 Relatórios</button>
+      <button class="manual-tab" onclick="verCapitulo(6,this)">🆘 Emergência</button>
+      <button class="manual-tab" onclick="verCapitulo(7,this)">💡 Dicas</button>
     </div>
     <!-- Conteúdo -->
     <div id="manual-content" style="flex:1;overflow-y:auto;padding:16px"></div>
@@ -1039,7 +1316,25 @@ let S = {
   ativo:false, atual:null, historico:[], registros:[]
 };
 
-function load(){try{const d=localStorage.getItem('cc3');if(d)S={...S,...JSON.parse(d)};}catch(e){}}
+function load(){
+  try{
+    const d=localStorage.getItem('cc3');
+    if(d){
+      const salvo = JSON.parse(d);
+      S = {...S, ...salvo};
+      // ── Migração: garantir campos novos ──
+      if(!S.rotinaLog)       S.rotinaLog={};
+      if(!S.msgAdmin)        S.msgAdmin='';
+      if(!S.msgAdminData)    S.msgAdminData='';
+      if(S.tMin===undefined) S.tMin=36.0;
+      if(S.tMax===undefined) S.tMax=37.5;
+      // Migrar remédios antigos sem pressaoMin
+      if(S.remedios) S.remedios = S.remedios.map(m=>({pressaoMin:null,...m}));
+      // Migrar rotinas antigas sem icone
+      if(S.rotinas)  S.rotinas  = S.rotinas.map(r=>({icone:'✔️',...r}));
+    }
+  }catch(e){ console.error('Erro ao carregar dados:', e); }
+}
 function save(){localStorage.setItem('cc3',JSON.stringify(S))}
 function toast(m){const e=document.getElementById('toast');e.textContent=m;e.classList.add('on');setTimeout(()=>e.classList.remove('on'),2400)}
 
@@ -1099,6 +1394,7 @@ function renderAll(){
   renderEstadoAtual();
   renderRotinaBtns();
   renderMsgAdmin();
+  renderDashboard();
 }
 
 function renderHeader(){
@@ -1109,6 +1405,9 @@ function renderHeader(){
 }
 
 function renderBanner(){
+  renderDashboard(); // dashboard is the new banner
+  // Legacy: also update sb- elements below
+
   // Banner mostra dados do plantão ATUAL apenas
   const regs = S.ativo&&S.atual
     ? S.registros.filter(r=>r.plantaoTs===S.atual.inicioTs)
@@ -1245,6 +1544,23 @@ function filtrar(f,btn){
 function renderRegistros(){
   const lista=document.getElementById('lista-regs');
   let regs=[...S.registros].reverse();
+  // Apply text search if active
+  if(_buscaTxt){
+    regs = regs.filter(r=>{
+      const searchable = [
+        r.tipo, r.valor, r.pas, r.pad, r.pulso,
+        r.nome, r.dose, r.via, r.texto, r.categoria,
+        r.tipo_ref, r.aceitacao, r.momento, r.local,
+        r.cuidadora, r.obs,
+        r.peso ? r.peso+'kg' : '',
+        r.diurese ? r.diurese+'ml' : '',
+        hora2(r.ts),
+        new Date(r.ts).toLocaleDateString('pt-BR'),
+      ].filter(Boolean).join(' ').toLowerCase();
+      return searchable.includes(_buscaTxt);
+    });
+  }
+
   if(filtroAtivo==='atual'){
     const pts = S.ativo&&S.atual ? S.atual.inicioTs : (S.historico.length ? S.historico[S.historico.length-1].inicioTs : null);
     regs = pts ? regs.filter(r=>r.plantaoTs===pts) : regs.slice(0,50);
@@ -1594,18 +1910,22 @@ function addRemedio(){
   const dose=document.getElementById('med-dose').value.trim();
   if(!nome||!dose){toast('⚠️ Nome e dose são obrigatórios!');return;}
   const tipo=getPill('pills-med-tipo');
+  const _pmin = document.getElementById('med-pressao-min');
+  const pressaoMin = _pmin && _pmin.value ? parseInt(_pmin.value) : null;
   S.remedios.push({
     nome, dose,
     horario: document.getElementById('med-horario').value.trim(),
     via:     document.getElementById('med-via').value,
     obs:     document.getElementById('med-obs').value.trim(),
-    tipo:    tipo
+    tipo:    tipo,
+    pressaoMin
   });
   save();renderAll();
   document.getElementById('med-nome').value='';
   document.getElementById('med-dose').value='';
   document.getElementById('med-horario').value='';
   document.getElementById('med-obs').value='';
+  document.getElementById('med-pressao-min').value='';
   document.getElementById('med-obs').value='';
   // reset pill
   document.querySelectorAll('#pills-med-tipo .pill').forEach((p,i)=>p.classList.toggle('on',i===0));
@@ -1686,21 +2006,24 @@ function gerarRelatorioPlantao(){
   const agora = new Date();
   const hora  = agora.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
   const data  = agora.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'});
-  const turnoIco  = p.turno==='diurno'?'☀️':'🌙';
+  const turnoIcon = p.turno==='diurno'?'☀️':'🌙';
   const turnoNome = p.turno==='diurno'?'Diurno  06:30 › 18:30':'Noturno  18:30 › 06:30';
   const emAndamento = S.ativo && S.atual && S.atual.inicioTs===p.inicioTs;
-  const status = emAndamento ? '🟢 EM ANDAMENTO' : '✅ ENCERRADO';
   const horario = p.inicio + (p.fim?' › '+p.fim:' › em curso');
 
-  const gls  = regs.filter(r=>r.tipo==='glicose');
-  const prs  = regs.filter(r=>r.tipo==='pressao');
-  const tps  = regs.filter(r=>r.tipo==='temp');
-  const refs = regs.filter(r=>r.tipo==='refeicao');
-  const mds  = regs.filter(r=>r.tipo==='medicamento');
-  const notas= regs.filter(r=>r.tipo==='nota');
+  const gls   = regs.filter(r=>r.tipo==='glicose');
+  const prs   = regs.filter(r=>r.tipo==='pressao');
+  const tps   = regs.filter(r=>r.tipo==='temp');
+  const refs  = regs.filter(r=>r.tipo==='refeicao');
+  const mds   = regs.filter(r=>r.tipo==='medicamento');
+  const oxs   = regs.filter(r=>r.tipo==='oxigenacao');
+  const pds   = regs.filter(r=>r.tipo==='peso_diurese');
+  const escs  = regs.filter(r=>r.tipo==='escara');
+  const rots  = regs.filter(r=>r.tipo==='rotina');
+  const notas = regs.filter(r=>r.tipo==='nota');
   const notasVis = notas.filter(n=>!n.texto.startsWith('📋')&&!n.texto.startsWith('🏁'));
-  const passagem = notas.find(n=>n.texto.startsWith('📋'));
-  const fechamento = notas.find(n=>n.texto.startsWith('🏁'));
+  const passagem  = notas.find(n=>n.texto.startsWith('📋'));
+  const fechamento= notas.find(n=>n.texto.startsWith('🏁'));
 
   // Alertas
   const alertas=[];
@@ -1716,20 +2039,28 @@ function gerarRelatorioPlantao(){
     if(t.valor>S.tMax) alertas.push('🔴 FEBRE: *'+t.valor+'°C* às '+hora2(t.ts));
     else if(t.valor<S.tMin) alertas.push('🔴 TEMP. BAIXA: *'+t.valor+'°C* às '+hora2(t.ts));
   });
+  oxs.forEach(o=>{
+    if(o.valor<90) alertas.push('🔴 SpO₂ CRÍTICA: *'+o.valor+'%* às '+hora2(o.ts));
+    else if(o.valor<94) alertas.push('🟡 SpO₂ BAIXA: *'+o.valor+'%* às '+hora2(o.ts));
+  });
+  escs.forEach(e=>{
+    if(e.estado&&(e.estado.includes('Ferida')||e.estado.includes('necrótico')||e.estado.includes('Bolha')))
+      alertas.push('🔴 ESCARA: *'+e.estado+'* em '+e.local);
+  });
 
   let L = [];
 
   // ── CABEÇALHO ──
   L.push('━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
   L.push('🏥 *'+S.paciente.toUpperCase()+'*');
-  L.push(turnoIco+' *Plantão '+turnoNome+'*');
+  L.push(turnoIcon+' *Plantão '+turnoNome+'*');
+  L.push(emAndamento ? '🟢 *EM ANDAMENTO* — Relatório parcial até '+hora : '✅ *ENCERRADO*');
   L.push('━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
   L.push('');
-  L.push('👤 *Cuidadora:* '+( p.cuidadora||'–'));
-  L.push('📅 *Data:* '+(p.inicioDate||data)+'   ⏱ *Horário:* '+horario);
-  L.push('📌 '+status);
+  L.push('👤 *Cuidadora:* '+(p.cuidadora||'–'));
+  L.push('📅 *Data:* '+(p.inicioDate||data)+'   ⏱ '+horario);
 
-  // Alertas no topo
+  // Alertas
   if(alertas.length){
     L.push('');
     L.push('┌─────────────────────────┐');
@@ -1741,15 +2072,14 @@ function gerarRelatorioPlantao(){
   // ── GLICEMIA ──
   if(gls.length){
     L.push('');
-    L.push('🩸 *GLICEMIA (DEXTRO)*');
+    L.push('🩸 *GLICEMIA*');
     gls.forEach(g=>{
-      const ico = g.valor<S.gMin||g.valor>S.gMax ? '🔴' : '🟢';
-      const status2 = g.valor<S.gMin?'  _(hipoglicemia)_':g.valor>S.gMax?'  _(hiperglicemia)_':'';
-      L.push('  '+ico+' '+hora2(g.ts)+'  →  *'+g.valor+' mg/dL*  '+g.momento+status2);
+      const ico = g.valor<S.gMin||g.valor>S.gMax?'🔴':'🟢';
+      L.push('  '+ico+' '+hora2(g.ts)+'  →  *'+g.valor+' mg/dL*  '+g.momento);
     });
     if(gls.length>1){
       const med=Math.round(gls.reduce((a,g)=>a+g.valor,0)/gls.length);
-      L.push('  _↳ Média do plantão: '+med+' mg/dL  (ref: '+S.gMin+'–'+S.gMax+')_');
+      L.push('  _↳ Média: '+med+' mg/dL  (ref: '+S.gMin+'–'+S.gMax+')_');
     }
   }
 
@@ -1758,10 +2088,9 @@ function gerarRelatorioPlantao(){
     L.push('');
     L.push('💓 *PRESSÃO ARTERIAL*');
     prs.forEach(pr=>{
-      const ico = pr.pas>S.pasMax||pr.pad>S.padMax ? '🔴' : '🟢';
-      const pul = pr.pulso ? '  pulso '+pr.pulso+' bpm' : '';
-      const pos = pr.posicao ? '  _('+pr.posicao+')_' : '';
-      L.push('  '+ico+' '+hora2(pr.ts)+'  →  *'+pr.pas+'/'+pr.pad+' mmHg*'+pul+pos);
+      const ico = pr.pas>S.pasMax||pr.pad>S.padMax?'🔴':'🟢';
+      const pul = pr.pulso?' · '+pr.pulso+' bpm':'';
+      L.push('  '+ico+' '+hora2(pr.ts)+'  →  *'+pr.pas+'/'+pr.pad+' mmHg*'+pul+'  _('+pr.posicao+')_');
     });
   }
 
@@ -1770,9 +2099,18 @@ function gerarRelatorioPlantao(){
     L.push('');
     L.push('🌡️ *TEMPERATURA*');
     tps.forEach(t=>{
-      const ico = t.valor>S.tMax||t.valor<S.tMin ? '🔴' : '🟢';
-      const st2 = t.valor>S.tMax?' _(febre)_':t.valor<S.tMin?' _(baixa)_':'';
-      L.push('  '+ico+' '+hora2(t.ts)+'  →  *'+t.valor+'°C*  '+t.local+st2);
+      const ico = t.valor>S.tMax||t.valor<S.tMin?'🔴':'🟢';
+      L.push('  '+ico+' '+hora2(t.ts)+'  →  *'+t.valor+'°C*  '+t.local);
+    });
+  }
+
+  // ── OXIGENAÇÃO ──
+  if(oxs.length){
+    L.push('');
+    L.push('🫁 *OXIGENAÇÃO (SpO₂)*');
+    oxs.forEach(o=>{
+      const ico = o.valor<90?'🔴':o.valor<94?'🟡':'🟢';
+      L.push('  '+ico+' '+hora2(o.ts)+'  →  *'+o.valor+'%*  _('+o.suplementacao+')_');
     });
   }
 
@@ -1793,14 +2131,50 @@ function gerarRelatorioPlantao(){
     L.push('💊 *MEDICAMENTOS ADMINISTRADOS*');
     mds.forEach(m=>{
       L.push('  ✅ '+hora2(m.ts)+'  →  *'+m.nome+'* '+m.dose+'  _('+m.via+')_');
+      if(m.obs) L.push('     _'+m.obs+'_');
     });
   }
-  // Pendentes
-  const pendentes = S.remedios.filter((_,i)=>!S.medFeitos[i]);
-  if(pendentes.length && emAndamento){
+
+  // ── ROTINA ── (só mostra se tiver alguma feita)
+  if(rots.length){
     L.push('');
-    L.push('⏳ *MEDICAMENTOS PENDENTES*');
-    pendentes.forEach(m=>L.push('  ⬜ *'+m.nome+'* '+m.dose+'  _'+( m.horario||'–')+'_'));
+    L.push('✅ *ROTINA*');
+    // Agrupar por nome e mostrar horários
+    const rm={};
+    rots.forEach(r=>{if(!rm[r.nome])rm[r.nome]=[];rm[r.nome].push(r.ts);});
+    Object.entries(rm).forEach(([nome,horas])=>{
+      const taref = S.rotinas?S.rotinas.find(t=>t.nome===nome):null;
+      const ico = taref?taref.icone:'✔️';
+      L.push('  '+ico+' *'+nome+'*  '+horas.map(h=>hora2(h)).join(', '));
+    });
+  }
+
+  // ── PESO E DIURESE ──
+  if(pds.length){
+    L.push('');
+    L.push('⚖️ *PESO E DIURESE*');
+    pds.forEach(r=>{
+      const parts=[];
+      if(r.peso)    parts.push('Peso: *'+r.peso+' kg*');
+      if(r.diurese) parts.push('Diurese: *'+r.diurese+' ml*');
+      if(r.evacuacao&&r.evacuacao!=='Não') parts.push('Evacuação: '+r.evacuacao);
+      if(r.urina&&r.urina!=='Normal') parts.push('Urina: *'+r.urina+'*');
+      L.push('  ⚖️ '+hora2(r.ts)+'  →  '+parts.join('  ·  '));
+      if(r.obs) L.push('     _'+r.obs+'_');
+    });
+  }
+
+  // ── ESCARA / CURATIVO ──
+  if(escs.length){
+    L.push('');
+    L.push('🩹 *ESCARA / CURATIVO*');
+    escs.forEach(e=>{
+      const ico = e.estado&&(e.estado.includes('Ferida')||e.estado.includes('necrótico'))?'🔴':
+                  e.estado&&(e.estado.includes('Hiperemia')||e.estado.includes('Bolha'))?'🟡':'🟢';
+      L.push('  '+ico+' '+hora2(e.ts)+'  →  *'+e.local+'*  '+e.estado);
+      if(e.curativo) L.push('     '+e.curativo);
+      if(e.obs)      L.push('     _'+e.obs+'_');
+    });
   }
 
   // ── OCORRÊNCIAS ──
@@ -1813,21 +2187,28 @@ function gerarRelatorioPlantao(){
     });
   }
 
-  // ── PASSAGEM ──
-  if(passagem||fechamento){
+  // ── PASSAGEM (só no relatório final) ──
+  if(!emAndamento && (passagem||fechamento)){
     L.push('');
     L.push('─────────────────────────────');
-    if(passagem)  L.push('📋 _Início: '+passagem.texto.replace('📋 Passagem recebida: ','')+'_');
-    if(fechamento)L.push('🏁 _Encerramento: '+fechamento.texto.replace('🏁 Passagem: ','')+'_');
+    if(passagem)   L.push('📋 _Início: '+passagem.texto.replace('📋 Passagem recebida: ','')+'_');
+    if(fechamento) L.push('🏁 _Encerramento: '+fechamento.texto.replace('🏁 Passagem: ','')+'_');
   }
 
   // ── RODAPÉ ──
   L.push('');
   L.push('━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-  L.push('_CuidaCare  •  '+data+'  às  '+hora+'_');
+  if(emAndamento){
+    L.push('_⏱ Relatório parcial · '+data+' às '+hora+'_');
+    L.push('_Mais registros podem ser adicionados até o encerramento_');
+  } else {
+    L.push('_✅ Relatório completo · '+data+'_');
+  }
+  L.push('_CuidaCare  •  '+S.paciente+'_');
 
   mostrarRelatorio(L.join('\n'));
 }
+
 
 // ═══ RELATÓRIO DE PERÍODO ═══
 function gerarRelatorioPeriodo(){
@@ -2184,6 +2565,8 @@ function delRotina(i){
 function renderSOS(){
   const btn = document.getElementById('sos-btn');
   if(btn) btn.classList.add('on'); // sempre visível
+  const rb = document.getElementById('resumo-btn');
+  if(rb) rb.style.display = S.ativo ? 'flex' : 'none';
 }
 
 function abrirSOS(){
@@ -2578,7 +2961,41 @@ function pdfPlantao(){
       }
 
       // ── PASSAGEM ──
-      // Rotina com horários
+      // Escara / Curativo
+  const escaraRegs = regs.filter(r=>r.tipo==='escara');
+  if(escaraRegs.length){
+    html += rSection('🩹 Escara / Curativo', R.green);
+    html += rTabela(['Horário','Local','Estado da Pele','Curativo','Observação'],
+      escaraRegs.map(r=>{
+        const grave = r.estado&&(r.estado.includes('Ferida')||r.estado.includes('necrótico')||r.estado.includes('Bolha'));
+        const warn  = r.estado&&r.estado.includes('Hiperemia');
+        const cor   = grave?'color:'+R.rose+';font-weight:800':warn?'color:'+R.amber+';font-weight:700':'';
+        return [hora2(r.ts), r.local||'–', '<span style="'+cor+'">'+( r.estado||'–')+'</span>', r.curativo||'–', r.obs||'–'];
+      }), R.green, R.greenLt);
+  }
+
+  // Oxigenação
+  const oxRegs = regs.filter(r=>r.tipo==='oxigenacao');
+  if(oxRegs.length){
+    html += rSection('🫁 Oxigenação (SpO₂)', R.blue);
+    html += rTabela(['Horário','SpO₂','Suplementação O₂','Obs'],
+      oxRegs.map(r=>{
+        const cls = r.valor<90?'color:'+R.rose+';font-weight:800':r.valor<94?'color:'+R.amber+';font-weight:700':'color:'+R.green;
+        return [hora2(r.ts),'<span style="'+cls+'">'+r.valor+'%</span>',r.suplementacao||'–',r.obs||'–'];
+      }), R.blue, R.blueLt);
+  }
+
+  // Peso e Diurese
+  const pdRegs = regs.filter(r=>r.tipo==='escara'?(r.local||'')+(r.estado?' — '+r.estado:'')+(r.curativo?' · '+r.curativo:'')+(r.obs?' — '+r.obs:''):
+               r.tipo==='peso_diurese');
+  if(pdRegs.length){
+    html += rSection('⚖️ Peso e Diurese', R.blue);
+    html += rTabela(['Horário','Peso','Diurese','Evacuação','Urina','Obs'],
+      pdRegs.map(r=>[hora2(r.ts), r.peso?r.peso+' kg':'–', r.diurese?r.diurese+' ml':'–', r.evacuacao||'–', r.urina||'–', r.obs||'–']),
+      R.blue, R.blueLt);
+  }
+
+  // Rotina com horários
   const rotRegs = regs.filter(r=>r.tipo==='rotina');
   if(rotRegs.length){
     const rm={};
@@ -3941,6 +4358,8 @@ const TAREFAS = [
   {nome:'Higienização',       icone:'🧴'},
   {nome:'Troca Fraldinha',    icone:'👶'},
   {nome:'Troca Fralda',       icone:'🔄'},
+  {nome:'Curativo Escara',    icone:'🩹'},
+  {nome:'Hidratação da Pele', icone:'🧴'},
 ];
 
 function initRotinas(){
@@ -4041,6 +4460,11 @@ function abrirModalMeds(){
     return;
   }
 
+  // Verificar última pressão registrada
+  const regsAtual = S.registros.filter(r=>r.plantaoTs===S.atual.inicioTs);
+  const prsAtual  = regsAtual.filter(r=>r.tipo==='pressao');
+  const ultPress  = prsAtual.length ? prsAtual[prsAtual.length-1] : null;
+
   lista.innerHTML = S.remedios.map((m,i)=>{
     const dado = S.medFeitos[i];
     const hora = dado ? hora2(dado) : '';
@@ -4052,10 +4476,10 @@ function abrirModalMeds(){
       +'<div style="font-size:.75rem;color:var(--muted);margin-top:2px">'+m.dose+' · '+m.via+(m.horario?' · ⏰ '+m.horario:'')+'</div>'
       +(m.obs?'<div style="font-size:.75rem;color:var(--amber);margin-top:3px;font-weight:700">⚠️ '+m.obs+'</div>':'')
       +'</div>'
-      +'<button onclick="confirmarRemedio('+i+', document.getElementById(\'med-obs-inp-'+i+'\').value)" style="background:'+(dado?'var(--green)':'var(--teal)')
-      +';border:none;border-radius:10px;color:#fff;padding:10px 14px;font-family:Nunito,sans-serif;font-size:.82rem;font-weight:800;cursor:pointer;flex-shrink:0;min-width:80px">'
-      +(dado?'✅ '+hora:'✅ Dar')
-      +'</button>'
+      +(bloqueado
+        ? '<button disabled style="background:#ccc;border:none;border-radius:10px;color:#888;padding:10px 14px;font-family:Nunito,sans-serif;font-size:.82rem;font-weight:800;cursor:not-allowed;flex-shrink:0;min-width:80px">🚫 Bloqueado</button>'
+        : '<button onclick="confirmarRemedio('+i+', document.getElementById(\'med-obs-inp-'+i+'\').value)" style="background:'+(dado?'var(--green)':semPressao?'var(--amber)':'var(--teal)')+';border:none;border-radius:10px;color:#fff;padding:10px 14px;font-family:Nunito,sans-serif;font-size:.82rem;font-weight:800;cursor:pointer;flex-shrink:0;min-width:80px">'+(dado?'✅ '+hora:semPressao?'⚠️ Aferir PA':'✅ Dar')+'</button>'
+      )
       +'</div>'
       +'<input id="med-obs-inp-'+i+'" type="text" placeholder="Observação (opcional)…" style="width:100%;padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:Nunito,sans-serif;font-size:.82rem;background:var(--bg);color:var(--text)">'
       +'</div>';
@@ -4095,124 +4519,139 @@ function confirmarRemedio(i, obs){
 
 // ═══ MANUAL DE USO ═══
 const MANUAL = [
-  // 0 — Início
-  `<div class="manual-sec">🚀 Bem-vinda ao CuidaCare</div>
-  <div style="background:linear-gradient(135deg,#0E4A46,#1D7A73);border-radius:12px;padding:18px;color:#fff;margin-bottom:14px;text-align:center">
-    <div style="font-family:Lora,serif;font-size:1.3rem;font-weight:600;margin-bottom:6px">CuidaCare</div>
-    <div style="font-size:.82rem;opacity:.85;line-height:1.6">App para controle de plantões, medicamentos e cuidados ao paciente acamado.</div>
+// 0 — INÍCIO
+`<div class="manual-sec">🚀 Bem-vinda ao CuidaCare</div>
+<div style="background:linear-gradient(135deg,#0E4A46,#1D7A73);border-radius:12px;padding:18px;color:#fff;margin-bottom:14px;text-align:center">
+  <div style="font-family:Lora,serif;font-size:1.3rem;font-weight:600;margin-bottom:6px">CuidaCare</div>
+  <div style="font-size:.82rem;opacity:.85;line-height:1.6">App para controle de plantões, medicamentos e cuidados ao paciente acamado.</div>
+</div>
+<div class="manual-sec">📋 O que você pode registrar</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">
+  <div style="background:var(--amber-bg);border-radius:8px;padding:10px;text-align:center;font-size:.8rem;font-weight:700;color:var(--amber)">🩸 Glicemia</div>
+  <div style="background:var(--rose-bg);border-radius:8px;padding:10px;text-align:center;font-size:.8rem;font-weight:700;color:var(--rose)">💓 Pressão</div>
+  <div style="background:var(--blue-bg);border-radius:8px;padding:10px;text-align:center;font-size:.8rem;font-weight:700;color:var(--blue)">🌡️ Temperatura</div>
+  <div style="background:var(--green-bg);border-radius:8px;padding:10px;text-align:center;font-size:.8rem;font-weight:700;color:var(--green)">🍽️ Refeições</div>
+  <div style="background:var(--teal-bg);border-radius:8px;padding:10px;text-align:center;font-size:.8rem;font-weight:700;color:var(--teal)">💊 Remédios</div>
+  <div style="background:var(--surface2);border-radius:8px;padding:10px;text-align:center;font-size:.8rem;font-weight:700;color:var(--text)">✅ Rotina</div>
+  <div style="background:var(--blue-bg);border-radius:8px;padding:10px;text-align:center;font-size:.8rem;font-weight:700;color:var(--blue)">⚖️ Peso/Diurese</div>
+  <div style="background:var(--surface2);border-radius:8px;padding:10px;text-align:center;font-size:.8rem;font-weight:700;color:var(--text)">📝 Ocorrências</div>
+</div>
+<div class="manual-sec">⚙️ Configuração inicial (uma única vez)</div>
+<div class="manual-step"><div class="manual-step-num">1</div><div class="manual-step-txt"><strong>Vá em ⚙️ Config.</strong><span>Configure nome do paciente e valores de referência (glicose, pressão, temperatura).</span></div></div>
+<div class="manual-step"><div class="manual-step-num">2</div><div class="manual-step-txt"><strong>Cadastre as cuidadoras</strong><span>Os nomes aparecem como botões grandes na tela de plantão — 1 toque para selecionar.</span></div></div>
+<div class="manual-step"><div class="manual-step-num">3</div><div class="manual-step-txt"><strong>Cadastre os medicamentos</strong><span>Na aba 💊 Remédios. Inclua nome, dose, via, tipo e instruções importantes.</span></div></div>
+<div class="manual-step"><div class="manual-step-num">4</div><div class="manual-step-txt"><strong>Configure o número SOS</strong><span>Em Config. → Botão SOS. Formato: 5511999999999 (sem espaços ou símbolos).</span></div></div>
+<div class="manual-tip teal"><strong>💡 Rotina pré-cadastrada</strong><span>O app já vem com 13 tarefas de rotina prontas. Pode usar imediatamente!</span></div>
+<div class="manual-tip amber"><strong>📢 Mensagem da administradora</strong><span>Em Config. → Mensagem para as Cuidadoras. Escreva avisos sobre medicação ou qualquer instrução. Aparece ao iniciar o próximo plantão.</span></div>`,
+
+// 1 — PLANTÃO
+`<div class="manual-sec">🌅 Iniciando o Plantão</div>
+<div class="manual-step"><div class="manual-step-num">1</div><div class="manual-step-txt"><strong>Toque no seu nome</strong><span>Botões grandes com as cuidadoras cadastradas. Toque no seu nome — fica verde.</span></div></div>
+<div class="manual-step"><div class="manual-step-num">2</div><div class="manual-step-txt"><strong>Confirme o turno</strong><span>☀️ Diurno (06:30–18:30) ou 🌙 Noturno (18:30–06:30).</span></div></div>
+<div class="manual-step"><div class="manual-step-num">3</div><div class="manual-step-txt"><strong>Passagem (opcional)</strong><span>Estado do paciente ao chegar. Aparece nos próximos plantões.</span></div></div>
+<div class="manual-step"><div class="manual-step-num">4</div><div class="manual-step-txt"><strong>✅ Iniciar Plantão</strong><span>Se houver aviso da administradora, aparece primeiro. Depois a passagem do plantão anterior é exibida automaticamente.</span></div></div>
+<div class="manual-sec">📝 Registrando</div>
+<div class="manual-step"><div class="manual-step-num">🩸</div><div class="manual-step-txt"><strong>Glicemia</strong><span>Botão laranja. Digite o valor, escolha o momento e salve. Alerta automático se fora do intervalo.</span></div></div>
+<div class="manual-step"><div class="manual-step-num">💓</div><div class="manual-step-txt"><strong>Pressão</strong><span>Sistólica + diastólica + pulso + posição.</span></div></div>
+<div class="manual-step"><div class="manual-step-num">🌡️</div><div class="manual-step-txt"><strong>Temperatura</strong><span>Valor + local de aferição. Alerta automático de febre acima de 37.5°C.</span></div></div>
+<div class="manual-step"><div class="manual-step-num">🍽️</div><div class="manual-step-txt"><strong>Refeição</strong><span>Tipo + aceitação (total, parcial, recusou) + observação.</span></div></div>
+<div class="manual-step"><div class="manual-step-num">📝</div><div class="manual-step-txt"><strong>Ocorrência</strong><span>Anotação livre por categoria — evacuação, humor, dor, visita médica, urgência.</span></div></div>
+<div class="manual-step"><div class="manual-step-num">📋</div><div class="manual-step-txt"><strong>Resumo Rápido</strong><span>Botão 📋 verde flutuante (acima do SOS). Um toque envia glicose + pressão + temperatura para o WhatsApp. Para quando a família ligar.</span></div></div>
+<div class="manual-sec">🏁 Encerrando</div>
+<div class="manual-step"><div class="manual-step-num">1</div><div class="manual-step-txt"><strong>🏁 Encerrar e Revisar Plantão</strong><span>Botão vermelho na parte inferior.</span></div></div>
+<div class="manual-step"><div class="manual-step-num">2</div><div class="manual-step-txt"><strong>Leia a revisão</strong><span>✅ verde = feito · 🔴 vermelho = faltou.</span></div></div>
+<div class="manual-step"><div class="manual-step-num">3</div><div class="manual-step-txt"><strong>Escreva a passagem e confirme</strong><span>O rascunho é salvo automaticamente — não perde se fechar sem querer.</span></div></div>`,
+
+// 2 — REMÉDIOS
+`<div class="manual-sec">💊 Administrando Remédios</div>
+<div class="manual-tip rose"><strong>💉 SEMPRE antes da insulina</strong><span>Verifique a glicemia antes de aplicar. Se estiver abaixo do mínimo configurado, NÃO aplique e contate a família.</span></div>
+<div class="manual-step"><div class="manual-step-num">1</div><div class="manual-step-txt"><strong>Toque em 💉 Remédios na rotina</strong><span>Lista de todos os medicamentos com dose, via e instruções abre na tela.</span></div></div>
+<div class="manual-step"><div class="manual-step-num">2</div><div class="manual-step-txt"><strong>Toque em ✅ Dar</strong><span>O horário é registrado automaticamente. O botão fica verde com a hora.</span></div></div>
+<div class="manual-step"><div class="manual-step-num">3</div><div class="manual-step-txt"><strong>Campo de observação</strong><span>Escreva onde aplicou a insulina, se recusou, ou qualquer detalhe.</span></div></div>
+<div class="manual-tip teal"><strong>🎨 Badge de tipo</strong><span>Cada remédio mostra 💉 INSULINA, 💊 USO CONTÍNUO, ⚠️ SE NECESSÁRIO ou 🩹 CURATIVO em cores para não confundir.</span></div>
+<div class="manual-sec">➕ Cadastrando medicamento</div>
+<div class="manual-step"><div class="manual-step-num ico">⚙️</div><div class="manual-step-txt"><strong>Aba Remédios → Cadastrar</strong><span>Nome · Dose · Via · Horário de referência · Instruções importantes · Tipo.</span></div></div>`,
+
+// 3 — ROTINA
+`<div class="manual-sec">✅ Botões de Rotina (13 tarefas)</div>
+<div class="manual-step"><div class="manual-step-num">1</div><div class="manual-step-txt"><strong>Toque no botão da tarefa</strong><span>🛏️ Decúbito · ↩️ Volta · 💊 Vitamina · 🥤 Hidratação · 🍽️ Almoço · 🍲 Janta · 💉 Remédios · 🩹 Troca Placa · 🫙 Limpeza Bolsa · 🚿 Banho · 🧴 Higienização · 👶 Fraldinha · 🔄 Fralda</span></div></div>
+<div class="manual-step"><div class="manual-step-num">2</div><div class="manual-step-txt"><strong>Modal com horário automático</strong><span>Mostra a hora atual e campo de observações.</span></div></div>
+<div class="manual-step"><div class="manual-step-num">3</div><div class="manual-step-txt"><strong>⚡ Registrar sem obs ou ✅ Confirmar</strong><span>Sem obs é mais rápido. Enter também confirma.</span></div></div>
+<div class="manual-tip teal"><strong>🔄 Múltiplos registros</strong><span>Decúbito pode ser tocado várias vezes — o botão mostra "2x" e o horário do último. No relatório saem todos os horários.</span></div>
+<div class="manual-tip verde"><strong>📊 Barra de progresso</strong><span>Mostra quantas tarefas foram feitas. Ex: 8/13. Fica verde quando tudo está feito.</span></div>
+<div class="manual-sec">🥤 Dica — Hidratação</div>
+<div class="manual-tip amber"><strong>No campo de observação, anote:</strong><span>Se foi água saborizada, água com espessante, suco, a quantidade aproximada, etc.</span></div>
+<div class="manual-sec">🫙 Dica — Limpeza da Bolsa e Troca da Placa</div>
+<div class="manual-tip amber"><strong>No campo de observação, anote:</strong><span>Volume da bolsa, consistência, coloração, estado da pele ao redor do estoma, intercorrências.</span></div>`,
+
+// 4 — PESO E DIURESE
+`<div class="manual-sec">⚖️ Registrando Peso e Diurese</div>
+<p style="font-size:.82rem;color:var(--muted);margin-bottom:14px;line-height:1.6">Botão ⚖️ Peso/Diurese nos registros rápidos da aba Plantão. Use para controle do balanço hídrico solicitado pelo médico.</p>
+<div class="manual-step"><div class="manual-step-num">1</div><div class="manual-step-txt"><strong>Toque em ⚖️ Peso/Diurese</strong><span>Modal abre com campos para preencher.</span></div></div>
+<div class="manual-step"><div class="manual-step-num">2</div><div class="manual-step-txt"><strong>Preencha o que tiver</strong><span>Peso (kg) · Diurese (ml) · Evacuação (sim/não) · Aspecto da urina · Observações. Não precisa preencher tudo.</span></div></div>
+<div class="manual-step"><div class="manual-step-num">3</div><div class="manual-step-txt"><strong>✅ Salvar Registro</strong><span>Aparece no histórico com ícone ⚖️ e no relatório do plantão em tabela separada.</span></div></div>
+<div class="manual-sec">📊 No relatório</div>
+<div class="manual-tip teal"><strong>Tabela de Peso e Diurese</strong><span>Aparece no Relatório de Plantão e no Relatório de Período com todos os valores registrados.</span></div>
+<div class="manual-sec">💧 Aspecto da urina</div>
+<div style="background:var(--surface);border-radius:10px;overflow:hidden;border:1px solid var(--border);margin-bottom:12px">
+  <div style="padding:9px 14px;border-bottom:1px solid var(--border);font-size:.8rem"><b>Normal</b> — coloração amarelo claro a âmbar, sem odor forte</div>
+  <div style="padding:9px 14px;border-bottom:1px solid var(--border);font-size:.8rem;background:var(--amber-bg)"><b>Escura</b> — pode indicar pouca hidratação ou outras causas</div>
+  <div style="padding:9px 14px;font-size:.8rem;background:var(--rose-bg)"><b>Com sangue</b> — comunicar família e médico imediatamente</div>
+</div>`,
+
+// 5 — RELATÓRIOS
+`<div class="manual-sec">📤 Gerando Relatórios</div>
+<p style="font-size:.82rem;color:var(--muted);margin-bottom:14px;line-height:1.6">Aba 📤 Relatório — a qualquer momento durante ou após o plantão.</p>
+<div class="manual-sec">📋 Relatório de Plantão</div>
+<div class="manual-step"><div class="manual-step-num">💬</div><div class="manual-step-txt"><strong>WhatsApp</strong><span>Texto formatado com todos os dados. Abre direto para enviar no grupo.</span></div></div>
+<div class="manual-step"><div class="manual-step-num">📊</div><div class="manual-step-txt"><strong>Visualizar</strong><span>Relatório completo na tela — tabelas coloridas por seção: glicemia, pressão, temperatura, alimentação, remédios, rotina com horários, peso/diurese.</span></div></div>
+<div class="manual-sec">📅 Relatório de Período</div>
+<div class="manual-step"><div class="manual-step-num">1</div><div class="manual-step-txt"><strong>Escolha quantos plantões</strong><span>4 plantões = as 4 cuidadoras em 2 dias. 14 = uma semana.</span></div></div>
+<div class="manual-step"><div class="manual-step-num">📈</div><div class="manual-step-txt"><strong>Gráficos</strong><span>Linhas de glicemia e pressão ao longo do tempo com referências marcadas.</span></div></div>
+<div class="manual-sec">📋 Resumo Rápido</div>
+<div class="manual-tip teal"><strong>📋 Botão verde flutuante</strong><span>Aparece acima do SOS quando há plantão ativo. Um toque envia últimos valores (glicose + pressão + temperatura) direto para o WhatsApp. Ideal quando a família liga.</span></div>
+<div class="manual-sec">🔍 Busca no Histórico</div>
+<div class="manual-tip teal"><strong>Campo de busca na aba Registros</strong><span>Digite qualquer coisa — valor (102), cuidadora (Carla), data (12/03), remédio (insulina). Filtra em tempo real.</span></div>`,
+
+// 6 — EMERGÊNCIA
+`<div class="manual-sec">🆘 Botão SOS</div>
+<div class="manual-tip rose"><strong>🔴 Botão vermelho pulsante — sempre visível</strong><span>Canto inferior direito. Envia mensagem de emergência com últimos valores para o WhatsApp da família.</span></div>
+<div class="manual-step"><div class="manual-step-num">1</div><div class="manual-step-txt"><strong>Toque no botão SOS</strong><span>Mensagem de emergência com os últimos valores aparece.</span></div></div>
+<div class="manual-step"><div class="manual-step-num">2</div><div class="manual-step-txt"><strong>Confirme e envie</strong><span>A mensagem vai para o WhatsApp da família com todos os dados do paciente.</span></div></div>
+<div class="manual-sec">⚠️ O que fazer em cada alerta</div>
+<div style="background:var(--rose-bg);border-radius:10px;padding:12px;margin-bottom:10px;border:1px solid var(--rose)">
+  <div style="font-size:.82rem;font-weight:800;color:var(--rose);margin-bottom:8px">🔴 Ação imediata em cada situação:</div>
+  <div style="font-size:.8rem;line-height:2;color:var(--text)">
+    <b>Hipoglicemia</b> — Suco ou água com açúcar. Repetir aferição em 15 min.<br>
+    <b>Hiperglicemia</b> — Comunicar família e médico.<br>
+    <b>Pressão elevada</b> — Repouso. Não movimentar. Comunicar família.<br>
+    <b>Febre</b> — Compressa fria. Antitérmico se prescrito. Comunicar família.<br>
+    <b>Urina com sangue</b> — Comunicar médico imediatamente.<br>
+    <b>⏰ 6 bipes</b> — 1h sem registros. Faça as aferições pendentes.
   </div>
-  <div class="manual-sec">📋 O que você pode registrar</div>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">
-    <div style="background:var(--amber-bg);border-radius:8px;padding:10px;text-align:center;font-size:.8rem;font-weight:700;color:var(--amber)">🩸 Glicemia</div>
-    <div style="background:var(--rose-bg);border-radius:8px;padding:10px;text-align:center;font-size:.8rem;font-weight:700;color:var(--rose)">💓 Pressão</div>
-    <div style="background:var(--blue-bg);border-radius:8px;padding:10px;text-align:center;font-size:.8rem;font-weight:700;color:var(--blue)">🌡️ Temperatura</div>
-    <div style="background:var(--green-bg);border-radius:8px;padding:10px;text-align:center;font-size:.8rem;font-weight:700;color:var(--green)">🍽️ Refeições</div>
-    <div style="background:var(--teal-bg);border-radius:8px;padding:10px;text-align:center;font-size:.8rem;font-weight:700;color:var(--teal)">💊 Remédios</div>
-    <div style="background:var(--surface2);border-radius:8px;padding:10px;text-align:center;font-size:.8rem;font-weight:700;color:var(--text)">✅ Rotina</div>
-  </div>
-  <div class="manual-sec">⚙️ Configuração inicial</div>
-  <div class="manual-step"><div class="manual-step-num">1</div><div class="manual-step-txt"><strong>Vá em ⚙️ Config.</strong><span>Configure nome do paciente e os valores de referência (glicose, pressão, temperatura).</span></div></div>
-  <div class="manual-step"><div class="manual-step-num">2</div><div class="manual-step-txt"><strong>Cadastre as cuidadoras</strong><span>Em Config. > Cuidadoras. Os nomes aparecem como botões grandes na tela de plantão.</span></div></div>
-  <div class="manual-step"><div class="manual-step-num">3</div><div class="manual-step-txt"><strong>Cadastre os medicamentos</strong><span>Na aba 💊 Remédios > Cadastrar Medicamento. Inclua nome, dose, via e instruções.</span></div></div>
-  <div class="manual-step"><div class="manual-step-num">4</div><div class="manual-step-txt"><strong>Configure o SOS</strong><span>Em Config., coloque o número do WhatsApp da família para emergências.</span></div></div>
-  <div class="manual-tip teal"><strong>💡 Rotina pré-cadastrada</strong><span>O app já vem com as 12 tarefas de rotina configuradas. Pronto para usar!</span></div>`,
+</div>`,
 
-  // 1 — Plantão
-  `<div class="manual-sec">🌅 Iniciando o Plantão</div>
-  <div class="manual-step"><div class="manual-step-num">1</div><div class="manual-step-txt"><strong>Toque no seu nome</strong><span>Os botões grandes mostram as cuidadoras cadastradas. Toque no seu nome — ele fica verde.</span></div></div>
-  <div class="manual-step"><div class="manual-step-num">2</div><div class="manual-step-txt"><strong>Selecione o turno</strong><span>☀️ Diurno (06:30–18:30) ou 🌙 Noturno (18:30–06:30).</span></div></div>
-  <div class="manual-step"><div class="manual-step-num">3</div><div class="manual-step-txt"><strong>Passagem (opcional)</strong><span>Escreva o estado do paciente ao chegar.</span></div></div>
-  <div class="manual-step"><div class="manual-step-num">4</div><div class="manual-step-txt"><strong>Toque em ✅ Iniciar Plantão</strong><span>O app mostra a passagem do plantão anterior automaticamente.</span></div></div>
-  <div class="manual-sec">📝 Registrando durante o plantão</div>
-  <div class="manual-step"><div class="manual-step-num">🩸</div><div class="manual-step-txt"><strong>Glicemia</strong><span>Toque no botão laranja. Digite o valor, escolha o momento (jejum, pós-prandial...) e salve.</span></div></div>
-  <div class="manual-step"><div class="manual-step-num">💓</div><div class="manual-step-txt"><strong>Pressão</strong><span>Preencha sistólica, diastólica e pulso. Selecione a posição (deitada, sentada).</span></div></div>
-  <div class="manual-step"><div class="manual-step-num">🌡️</div><div class="manual-step-txt"><strong>Temperatura</strong><span>Digite o valor e selecione o local (axilar, oral).</span></div></div>
-  <div class="manual-step"><div class="manual-step-num">🍽️</div><div class="manual-step-txt"><strong>Refeição</strong><span>Escolha o tipo e a aceitação (total, parcial, recusou). Anote observações se precisar.</span></div></div>
-  <div class="manual-step"><div class="manual-step-num">📝</div><div class="manual-step-txt"><strong>Ocorrência</strong><span>Para qualquer anotação livre — evacuação, humor, dor, visita médica...</span></div></div>
-  <div class="manual-sec">🏁 Encerrando o Plantão</div>
-  <div class="manual-step"><div class="manual-step-num">1</div><div class="manual-step-txt"><strong>Role até Encerrar Plantão</strong><span>O botão vermelho na parte inferior da aba Plantão.</span></div></div>
-  <div class="manual-step"><div class="manual-step-num">2</div><div class="manual-step-txt"><strong>Leia a revisão</strong><span>O app mostra o que foi feito ✅ e o que ficou pendente 🔴.</span></div></div>
-  <div class="manual-step"><div class="manual-step-num">3</div><div class="manual-step-txt"><strong>Escreva a passagem</strong><span>Estado do paciente para a próxima cuidadora.</span></div></div>
-  <div class="manual-step"><div class="manual-step-num">4</div><div class="manual-step-txt"><strong>Confirme e envie o relatório</strong><span>Após confirmar, vá para a aba Relatório e envie pelo WhatsApp.</span></div></div>`,
-
-  // 2 — Remédios
-  `<div class="manual-sec">💊 Administrando Remédios</div>
-  <div class="manual-tip amber"><strong>⚠️ Insulina — leia antes</strong><span>SEMPRE verifique a glicemia antes de aplicar insulina. Se estiver abaixo do mínimo configurado, NÃO aplique e contate a família.</span></div>
-  <div class="manual-step"><div class="manual-step-num">1</div><div class="manual-step-txt"><strong>Pelo botão Remédios na rotina</strong><span>Toque no botão 💉 Remédios nos botões de rotina. Uma lista abre com todos os medicamentos.</span></div></div>
-  <div class="manual-step"><div class="manual-step-num">2</div><div class="manual-step-txt"><strong>Toque em ✅ Dar</strong><span>Ao lado de cada remédio. O horário é registrado automaticamente.</span></div></div>
-  <div class="manual-step"><div class="manual-step-num">3</div><div class="manual-step-txt"><strong>Campo de observação</strong><span>Escreva onde foi aplicada a insulina, se recusou, ou qualquer obs relevante.</span></div></div>
-  <div class="manual-sec">📋 Consultando a ficha</div>
-  <div class="manual-step"><div class="manual-step-num">💊</div><div class="manual-step-txt"><strong>Aba Remédios</strong><span>Mostra todos os medicamentos cadastrados com dose, horário e instruções. Confira antes de dar.</span></div></div>
-  <div class="manual-sec">➕ Cadastrando medicamento</div>
-  <div class="manual-step"><div class="manual-step-num">1</div><div class="manual-step-txt"><strong>Aba Remédios > Cadastrar</strong><span>Preencha nome, dose, via, horário de referência e instruções importantes.</span></div></div>
-  <div class="manual-step"><div class="manual-step-num">2</div><div class="manual-step-txt"><strong>Escolha o tipo</strong><span>Uso contínuo, Insulina, Se necessário (SN) ou Curativo/Tópico. Aparece organizado na ficha.</span></div></div>
-  <div class="manual-tip rose"><strong>💉 Dica para insulina</strong><span>No campo de instruções escreva: "Se glicemia abaixo de 80 mg/dL, NÃO aplicar e chamar a família."</span></div>`,
-
-  // 3 — Rotina
-  `<div class="manual-sec">✅ Usando os Botões de Rotina</div>
-  <p style="font-size:.82rem;color:var(--muted);margin-bottom:12px;line-height:1.6">Os 12 botões de rotina ficam na aba Plantão. Registre cada tarefa com o horário exato.</p>
-  <div class="manual-step"><div class="manual-step-num">1</div><div class="manual-step-txt"><strong>Toque no botão da tarefa</strong><span>Ex: 🛏️ Decúbito Dorsal, 🚿 Banho, 🔄 Troca Fralda...</span></div></div>
-  <div class="manual-step"><div class="manual-step-num">2</div><div class="manual-step-txt"><strong>Modal abre com horário</strong><span>Mostra a hora atual e um campo de observações.</span></div></div>
-  <div class="manual-step"><div class="manual-step-num">3</div><div class="manual-step-txt"><strong>Escreva uma obs (opcional)</strong><span>Ex: "Banho no leito, sem intercorrências" ou "Decúbito lateral esquerdo".</span></div></div>
-  <div class="manual-step"><div class="manual-step-num">4</div><div class="manual-step-txt"><strong>✅ Confirmar</strong><span>O botão fica verde com o horário do registro.</span></div></div>
-  <div class="manual-sec">📋 As 12 Tarefas</div>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:14px">
-    ${['🛏️ Decúbito Dorsal','↩️ Volta Decúbito','💊 Vitamina','🥤 Água Saborizada','🍽️ Almoço','🍲 Janta','💉 Remédios','🩹 Troca Placa Ileo.','🚿 Banho','🧴 Higienização','👶 Troca Fraldinha','🔄 Troca Fralda'].map(t=>'<div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:8px;font-size:.78rem;font-weight:700;text-align:center">'+t+'</div>').join('')}
-  </div>
-  <div class="manual-tip teal"><strong>🔄 Pode registrar várias vezes</strong><span>O botão mostra quantas vezes foi feito (ex: 2x) e o horário do último registro. O decúbito pode ser tocado a cada 2 horas.</span></div>
-  <div class="manual-tip verde"><strong>📊 Barra de progresso</strong><span>No topo da seção mostra quantas tarefas foram concluídas. Ex: 8/12. Fica verde quando tudo está feito!</span></div>`,
-
-  // 4 — Relatórios
-  `<div class="manual-sec">📤 Gerando Relatórios</div>
-  <p style="font-size:.82rem;color:var(--muted);margin-bottom:12px;line-height:1.6">Vá para a aba 📤 Relatório a qualquer momento durante ou após o plantão.</p>
-  <div class="manual-sec">📋 Relatório de Plantão</div>
-  <div class="manual-step"><div class="manual-step-num">💬</div><div class="manual-step-txt"><strong>Botão WhatsApp</strong><span>Gera o texto formatado do plantão e abre direto para enviar no grupo.</span></div></div>
-  <div class="manual-step"><div class="manual-step-num">📊</div><div class="manual-step-txt"><strong>Botão Visualizar</strong><span>Mostra o relatório completo na tela com tabelas coloridas.</span></div></div>
-  <div class="manual-sec">📅 Relatório de Período</div>
-  <div class="manual-step"><div class="manual-step-num">1</div><div class="manual-step-txt"><strong>Escolha quantos plantões</strong><span>2, 4, 6, 8, 14 plantões ou todos. 4 plantões = 2 dias com as 4 cuidadoras.</span></div></div>
-  <div class="manual-step"><div class="manual-step-num">2</div><div class="manual-step-txt"><strong>WhatsApp ou Visualizar</strong><span>O relatório inclui equipe, alertas, resumo clínico com estatísticas e detalhe por plantão.</span></div></div>
-  <div class="manual-step"><div class="manual-step-num">📈</div><div class="manual-step-txt"><strong>Botão Gráficos</strong><span>Gráficos de linha da glicemia e pressão com linhas de referência e estatísticas.</span></div></div>
-  <div class="manual-sec">💊 Ficha de Medicação</div>
-  <div class="manual-step"><div class="manual-step-num">💬</div><div class="manual-step-txt"><strong>WhatsApp</strong><span>Envia a ficha completa com todos os remédios, doses e status no plantão.</span></div></div>
-  <div class="manual-tip teal"><strong>📅 Dica semanal</strong><span>Envie o relatório de período toda semana para o médico e para a família acompanharem a evolução.</span></div>`,
-
-  // 5 — Emergência
-  `<div class="manual-sec">🆘 Botão SOS</div>
-  <div class="manual-tip rose"><strong>🔴 Botão vermelho pulsante</strong><span>Sempre visível no canto inferior direito da tela. Use em qualquer emergência.</span></div>
-  <div class="manual-step"><div class="manual-step-num">1</div><div class="manual-step-txt"><strong>Toque no botão SOS</strong><span>Aparece uma mensagem com os últimos valores do paciente.</span></div></div>
-  <div class="manual-step"><div class="manual-step-num">2</div><div class="manual-step-txt"><strong>Toque em Enviar Alerta</strong><span>A mensagem de emergência vai para o WhatsApp da família com todos os dados.</span></div></div>
-  <div class="manual-sec">⚠️ Alertas automáticos</div>
-  <div style="background:var(--rose-bg);border-radius:10px;padding:12px;margin-bottom:10px">
-    <div style="font-size:.82rem;font-weight:800;color:var(--rose);margin-bottom:8px">🔴 O que fazer em cada alerta:</div>
-    <div style="font-size:.8rem;line-height:1.8;color:var(--text)">
-      <b>Hipoglicemia</b> — Oferece suco ou água com açúcar. Repetir aferição em 15 min.<br>
-      <b>Hiperglicemia</b> — Comunicar família e médico.<br>
-      <b>Pressão elevada</b> — Paciente em repouso. Comunicar família.<br>
-      <b>Febre</b> — Compressa fria. Dar antitérmico se prescrito. Comunicar família.<br>
-      <b>1h sem registros</b> — O app toca 6 bipes. Faça as aferições pendentes.
-    </div>
-  </div>
-  <div class="manual-sec">📞 Contato de Emergência</div>
-  <div class="manual-step"><div class="manual-step-num">⚙️</div><div class="manual-step-txt"><strong>Configure em Config. > SOS</strong><span>Coloque o número no formato: 5511999999999 (sem espaços, traços ou parênteses).</span></div></div>`,
-
-  // 6 — Dicas
-  `<div class="manual-sec">💡 Dicas Importantes</div>
-  <div class="manual-tip teal"><strong>🌙 Modo Noturno</strong><span>Toque no botão 🌙 no topo. A tela fica escura para não incomodar o paciente de madrugada. Toque em ☀️ para voltar.</span></div>
-  <div class="manual-tip amber"><strong>🔊 Volume do celular</strong><span>Deixe sempre com volume ligado durante o plantão. O alarme de 1 hora e o som de confirmação precisam de volume.</span></div>
-  <div class="manual-tip verde"><strong>📱 Celular fixo</strong><span>O ideal é ter um celular dedicado ao paciente. O histórico fica completo e os relatórios de período ficam mais ricos.</span></div>
-  <div class="manual-tip teal"><strong>💬 Relatorio sempre</strong><span>Ao encerrar o plantão, sempre envie o relatório para o grupo da família. Mantém todos informados.</span></div>
-  <div class="manual-tip amber"><strong>📝 Use as observações</strong><span>Todo registro tem campo de observações. Use sempre — as anotações aparecem no relatório e ajudam a família e o médico.</span></div>
-  <div class="manual-tip rose"><strong>🔴 Alertas vermelhos</strong><span>Quando aparecer um alerta vermelho na tela, registre o que foi feito em Ocorrência e comunique a família pelo WhatsApp.</span></div>
-  <div class="manual-sec">❓ Dúvidas frequentes</div>
-  <div style="background:var(--surface);border-radius:10px;overflow:hidden;border:1px solid var(--border)">
-    ${[
-      ['Perdi os dados?','Os dados ficam no celular. Se não foi resetado, ainda estão lá.'],
-      ['Funciona sem internet?','Sim. Após abrir uma vez, funciona completamente offline.'],
-      ['Substituta pode usar?','Sim. Ela digita o nome no campo ao iniciar. Não precisa estar cadastrada.'],
-      ['Como enviar o relatório?','Aba Relatório > botão WhatsApp. Abre direto para enviar no grupo.'],
-      ['O alarme não tocou?','Verifique se o celular está no modo silencioso.'],
-    ].map((([p,r],i)=>'<div style="padding:10px 14px;border-bottom:1px solid var(--border);background:'+(i%2?'var(--bg)':'var(--surface)')+'"><div style="font-size:.8rem;font-weight:800;color:var(--text);margin-bottom:3px">'+p+'</div><div style="font-size:.78rem;color:var(--muted)">'+r+'</div></div>')).join('')}
-  </div>`
+// 7 — DICAS
+`<div class="manual-sec">💡 Dicas Importantes</div>
+<div class="manual-tip teal"><strong>🌙 Modo Noturno</strong><span>Botão 🌙 no topo. Tela escura para não perturbar o paciente. Toque ☀️ para voltar. O app lembra.</span></div>
+<div class="manual-tip amber"><strong>🔊 Mantenha o volume ligado</strong><span>O alarme de 1h e o som de confirmação precisam de volume. Não coloque no silencioso durante o plantão.</span></div>
+<div class="manual-tip verde"><strong>📱 Celular fixo</strong><span>Um celular dedicado ao paciente mantém o histórico completo e relatórios mais ricos.</span></div>
+<div class="manual-tip teal"><strong>💬 Envie sempre o relatório</strong><span>Ao encerrar o plantão, envie pelo WhatsApp para o grupo da família.</span></div>
+<div class="manual-tip amber"><strong>📝 Use as observações</strong><span>Todo registro tem campo de obs. Use sempre — aparecem no relatório e ajudam a família e o médico.</span></div>
+<div class="manual-tip teal"><strong>🔍 Busca rápida</strong><span>Na aba Registros, use o campo de busca para encontrar qualquer registro — por valor, data, cuidadora ou tipo.</span></div>
+<div class="manual-tip verde"><strong>📋 Resumo Rápido</strong><span>Quando a família ligar, toque no 📋 verde acima do SOS para enviar os últimos valores em segundos.</span></div>
+<div class="manual-sec">❓ Dúvidas frequentes</div>
+<div style="background:var(--surface);border-radius:10px;overflow:hidden;border:1px solid var(--border)">
+  ${[
+    ['Perdi os dados?','Os dados ficam no celular. Se não foi resetado, ainda estão lá.'],
+    ['Funciona sem internet?','Sim. Após abrir uma vez, funciona completamente offline.'],
+    ['Substituta pode usar?','Sim. Ela digita o próprio nome ao iniciar. Não precisa estar cadastrada.'],
+    ['O alarme não tocou?','Verifique se o celular está no modo silencioso.'],
+    ['Como apagar registro errado?','Aba Registros → toque no ✕ → confirme. Mostra o que vai apagar antes.'],
+    ['Como a administradora avisa?','Config. → Mensagem para as Cuidadoras → Salvar. Aparece ao iniciar o próximo plantão.'],
+    ['Como usar Peso/Diurese?','Botão ⚖️ nos registros rápidos do plantão.'],
+  ].map(([p,r],i)=>'<div style="padding:10px 14px;border-bottom:1px solid var(--border);background:'+(i%2?'var(--bg)':'var(--surface)')+'"><div style="font-size:.8rem;font-weight:800;color:var(--text);margin-bottom:3px">'+p+'</div><div style="font-size:.78rem;color:var(--muted)">'+r+'</div></div>').join('')}
+</div>`
 ];
 
 function abrirManual(){
@@ -4309,18 +4748,446 @@ function initBateria(){
   }).catch(()=>{});
 }
 
+
+// ══════════════════════════════════════
+// BUSCA NO HISTÓRICO
+// ══════════════════════════════════════
+let _buscaTxt = '';
+let _filtroAtual = 'todos';
+
+function filtrarBusca(txt){
+  _buscaTxt = txt.trim().toLowerCase();
+  document.getElementById('busca-limpar').style.display = _buscaTxt ? 'block' : 'none';
+  // Hide filter pills when searching
+  const pills = document.getElementById('filtros-reg');
+  if(pills) pills.style.opacity = _buscaTxt ? '.4' : '1';
+  renderRegistros();
+}
+
+function limparBusca(){
+  document.getElementById('busca-reg').value='';
+  filtrarBusca('');
+}
+
+// ══════════════════════════════════════
+// RESUMO RÁPIDO WHATSAPP
+// ══════════════════════════════════════
+function resumoRapido(){
+  if(!S.ativo||!S.atual){ toast('⚠️ Inicie um plantão primeiro!'); return; }
+  const regs = S.registros.filter(r=>r.plantaoTs===S.atual.inicioTs);
+  const agora = new Date();
+  const hora  = agora.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+  const data  = agora.toLocaleDateString('pt-BR');
+
+  const gls = regs.filter(r=>r.tipo==='glicose');
+  const prs = regs.filter(r=>r.tipo==='pressao');
+  const tps = regs.filter(r=>r.tipo==='temp');
+  const mds = regs.filter(r=>r.tipo==='medicamento');
+  const pds = regs.filter(r=>r.tipo==='escara'?(r.local||'')+(r.estado?' — '+r.estado:'')+(r.curativo?' · '+r.curativo:'')+(r.obs?' — '+r.obs:''):
+               r.tipo==='peso_diurese');
+
+  const turnoIco = S.atual.turno==='diurno'?'☀️':'🌙';
+
+  let L = [];
+  L.push('📋 *RESUMO RÁPIDO — '+S.paciente.toUpperCase()+'*');
+  L.push(turnoIco+' '+S.atual.cuidadora+'  •  '+data+'  •  '+hora);
+  L.push('');
+
+  if(gls.length){
+    const u=gls[gls.length-1];
+    const ico=u.valor<S.gMin||u.valor>S.gMax?'🔴':'🟢';
+    L.push(ico+' *Glicemia:* '+u.valor+' mg/dL  _('+hora2(u.ts)+')_');
+  } else L.push('🩸 Glicemia: _não aferida_');
+
+  if(prs.length){
+    const u=prs[prs.length-1];
+    const ico=u.pas>S.pasMax||u.pad>S.padMax?'🔴':'🟢';
+    L.push(ico+' *Pressão:* '+u.pas+'/'+u.pad+' mmHg  _('+hora2(u.ts)+')_');
+  } else L.push('💓 Pressão: _não aferida_');
+
+  if(tps.length){
+    const u=tps[tps.length-1];
+    const ico=u.valor>S.tMax||u.valor<S.tMin?'🔴':'🟢';
+    L.push(ico+' *Temperatura:* '+u.valor+'°C  _('+hora2(u.ts)+')_');
+  } else L.push('🌡️ Temperatura: _não aferida_');
+
+  const oxs = regs.filter(r=>r.tipo==='oxigenacao');
+  if(oxs.length){
+    const u=oxs[oxs.length-1];
+    const ico=u.valor<90?'🔴':u.valor<94?'🟡':'🟢';
+    L.push(ico+' *Oxigenação:* '+u.valor+'%  _('+hora2(u.ts)+')_');
+  } else L.push('🫁 Oxigenação: _não aferida_');
+
+  if(pds.length){
+    const u=pds[pds.length-1];
+    if(u.peso)    L.push('⚖️ *Peso:* '+u.peso+' kg  _('+hora2(u.ts)+')_');
+    if(u.diurese) L.push('💧 *Diurese:* '+u.diurese+' ml  _('+hora2(u.ts)+')_');
+  }
+
+  if(mds.length){
+    L.push('');
+    L.push('💊 *Remédios dados:* '+mds.map(m=>m.nome).join(', '));
+  }
+
+  const pendentes = S.remedios.filter((_,i)=>!S.medFeitos[i]);
+  if(pendentes.length){
+    L.push('⏳ *Pendentes:* '+pendentes.map(m=>m.nome).join(', '));
+  }
+
+  L.push('');
+  L.push('_CuidaCare  •  '+data+' às '+hora+'_');
+
+  const txt = L.join('\n');
+  window.open('https://wa.me/?text='+encodeURIComponent(txt),'_blank');
+  toast('📋 Resumo enviado para WhatsApp!');
+}
+
+// ══════════════════════════════════════
+// PESO E DIURESE
+// ══════════════════════════════════════
+function salvarPesoDiurese(){
+  const peso    = parseFloat(document.getElementById('m-peso').value)||null;
+  const diurese = parseFloat(document.getElementById('m-diurese').value)||null;
+  const evac    = getPill('pills-evacuacao');
+  const urina   = getPill('pills-urina');
+  const obs     = document.getElementById('m-peso-obs').value.trim();
+
+  if(!peso&&!diurese&&evac==='Não'&&obs===''){
+    toast('⚠️ Preencha pelo menos um campo!');
+    return;
+  }
+
+  const reg = {tipo:'peso_diurese', peso, diurese, evacuacao:evac, urina, obs};
+  addReg(reg);
+
+  // Update quick btn label
+  const ql = document.getElementById('ql-peso');
+  if(ql){
+    const parts=[];
+    if(peso) parts.push(peso+'kg');
+    if(diurese) parts.push(diurese+'ml');
+    ql.textContent = parts.length ? parts.join(' · ') : hora2(new Date().toISOString());
+  }
+
+  // Reset
+  document.getElementById('m-peso').value='';
+  document.getElementById('m-diurese').value='';
+  document.getElementById('m-peso-obs').value='';
+  fechar('modal-peso-diurese');
+  tocarSom();
+  renderAll();
+  toast('⚖️ Peso/Diurese registrado!');
+}
+
+
+// ═══ OXIGENAÇÃO ═══
+function colorirOxigenacao(){
+  const v = parseFloat(document.getElementById('m-oxigenacao').value);
+  const el = document.getElementById('m-oxigenacao');
+  if(!v) return;
+  if(v < 90) el.style.borderColor='var(--rose)';
+  else if(v < 94) el.style.borderColor='var(--amber)';
+  else el.style.borderColor='var(--green)';
+}
+
+function salvarOxigenacao(){
+  const v = parseFloat(document.getElementById('m-oxigenacao').value);
+  if(!v||v<50||v>100){ toast('⚠️ Valor inválido! Use entre 50 e 100.'); return; }
+  const supl = getPill('pills-o2-supl');
+  const obs  = document.getElementById('m-oxigenacao-obs').value.trim();
+
+  addReg({tipo:'oxigenacao', valor:v, suplementacao:supl, obs});
+
+  // Alerta crítico
+  if(v < 90){
+    toast('🔴 ATENÇÃO! SpO₂ '+v+'% — ABAIXO DE 90%! Chame ajuda!');
+  } else if(v < 94){
+    toast('⚠️ SpO₂ '+v+'% — abaixo do ideal. Monitorar!');
+  } else {
+    tocarSom();
+    toast('🫁 SpO₂: '+v+'%');
+  }
+
+  // Update quick btn
+  const ql = document.getElementById('ql-oxigenacao');
+  if(ql) ql.textContent = v+'%';
+
+  document.getElementById('m-oxigenacao').value='';
+  document.getElementById('m-oxigenacao-obs').value='';
+  fechar('modal-oxigenacao');
+  renderAll();
+}
+
+
+// ═══ BACKUP E IMPORTAÇÃO ═══
+function exportarBackup(){
+  const agora = new Date();
+  const nome = 'cuidacare-backup-'
+    + agora.toLocaleDateString('pt-BR').replace(/\//g,'-')
+    + '_' + agora.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}).replace(':','h')
+    + '.json';
+
+  const dados = {
+    _backup: {
+      versao: '2.1',
+      data: agora.toLocaleString('pt-BR'),
+      paciente: S.paciente,
+      totalRegistros: S.registros.length,
+      totalPlantoes: S.historico.length,
+    },
+    ...S
+  };
+
+  const blob = new Blob([JSON.stringify(dados, null, 2)], {type:'application/json'});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href=url; a.download=nome;
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+
+  const info = document.getElementById('backup-info');
+  if(info) info.textContent = '✅ Backup salvo: '+nome+' ('+S.registros.length+' registros)';
+  toast('💾 Backup exportado com sucesso!');
+}
+
+function importarBackup(input){
+  const file = input.files[0];
+  if(!file){ return; }
+  const reader = new FileReader();
+  reader.onload = e => {
+    try{
+      const dados = JSON.parse(e.target.result);
+      if(!dados.registros && !dados._backup){
+        toast('⚠️ Arquivo inválido! Use um backup do CuidaCare.');
+        return;
+      }
+      if(!confirm('Importar backup de '+(dados._backup?.data||'?')+'?\n\n'
+        +(dados._backup?.totalRegistros||0)+' registros · '
+        +(dados._backup?.totalPlantoes||0)+' plantões\n\nOs dados atuais serão substituídos.')) return;
+
+      // Remove metadados do backup antes de importar
+      const { _backup, ...dadosLimpos } = dados;
+      S = {...S, ...dadosLimpos};
+      // Aplicar migrações
+      if(!S.rotinaLog)    S.rotinaLog={};
+      if(!S.msgAdmin)     S.msgAdmin='';
+      if(S.remedios) S.remedios = S.remedios.map(m=>({pressaoMin:null,...m}));
+      if(S.rotinas)  S.rotinas  = S.rotinas.map(r=>({icone:'✔️',...r}));
+      save(); renderAll();
+      const info = document.getElementById('backup-info');
+      if(info) info.textContent = '✅ Backup importado: '+S.registros.length+' registros carregados';
+      toast('✅ Backup importado com sucesso!');
+    }catch(err){
+      toast('⚠️ Erro ao importar: arquivo corrompido.');
+      console.error(err);
+    }
+  };
+  reader.readAsText(file);
+  input.value=''; // reset input
+}
+
+// Verificar tamanho do localStorage e avisar se próximo do limite
+function verificarEspacoStorage(){
+  try{
+    const dados = localStorage.getItem('cc3')||'';
+    const kb = Math.round(dados.length / 1024);
+    const pct = Math.round(kb / 5120 * 100); // 5MB limit aproximado
+    if(pct > 70){
+      const info = document.getElementById('backup-info');
+      if(info) info.textContent = '⚠️ Armazenamento em '+pct+'% ('+kb+'KB). Considere fazer backup.';
+      if(pct > 90) toast('⚠️ Armazenamento quase cheio! Faça backup agora.');
+    } else {
+      const info = document.getElementById('backup-info');
+      if(info && !info.textContent) info.textContent = 'Armazenamento: '+kb+'KB usados de ~5MB disponíveis';
+    }
+  }catch(e){}
+}
+
+
+// ═══ DASHBOARD ═══
+let _dashTimer = null;
+
+function renderDashboard(){
+  const badge    = document.getElementById('dash-badge');
+  const sbName   = document.getElementById('sb-name');
+  const sbSub    = document.getElementById('sb-sub');
+  const timer    = document.getElementById('dash-timer');
+  const progDiv  = document.getElementById('dash-progresso');
+
+  if(!badge) return;
+
+  if(!S.ativo || !S.atual){
+    // Sem plantão — mostra dados do ÚLTIMO plantão
+    const ultPlantao = S.historico.length ? S.historico[S.historico.length-1] : null;
+    const regsUlt    = ultPlantao
+      ? S.registros.filter(r=>r.plantaoTs===ultPlantao.inicioTs)
+      : [];
+
+    if(ultPlantao){
+      const turnoIco = ultPlantao.turno==='diurno'?'☀️':'🌙';
+      badge.innerHTML = '📋 Último plantão — '+ultPlantao.cuidadora;
+      badge.style.background = 'rgba(255,255,255,.1)';
+      badge.style.color = '#a0d0cc';
+      sbName.textContent = 'Aguardando próximo plantão';
+      sbSub.textContent  = turnoIco+' '+ultPlantao.cuidadora
+        +' · '+(ultPlantao.inicioDate||'')
+        +' · '+(ultPlantao.inicio||'')+(ultPlantao.fim?' → '+ultPlantao.fim:'');
+    } else {
+      badge.textContent = '⚫ Nenhum plantão ainda';
+      badge.style.background = 'rgba(255,255,255,.1)';
+      badge.style.color = '#a0d0cc';
+      sbName.textContent = 'Nenhum plantão ainda';
+      sbSub.textContent  = 'Inicie o primeiro plantão abaixo';
+    }
+
+    if(timer)   timer.style.display='none';
+    if(progDiv) progDiv.style.display='none';
+    // Mostra vitais do ÚLTIMO plantão — para a próxima cuidadora ver
+    renderDashVitais(regsUlt);
+    return;
+  }
+
+  // Com plantão ativo
+  const turnoIco  = S.atual.turno==='diurno'?'☀️':'🌙';
+  const turnoNome = S.atual.turno==='diurno'?'Diurno':'Noturno';
+  badge.innerHTML  = turnoIco+' Plantão '+turnoNome+' — em andamento';
+  badge.style.background = 'rgba(77,212,204,.2)';
+  badge.style.color = '#4DD4CC';
+  sbName.textContent = S.atual.cuidadora || 'Cuidadora';
+  sbSub.textContent  = S.atual.inicio + ' → em curso';
+
+  // Timer
+  if(timer){
+    timer.style.display='block';
+    const mins = Math.round((Date.now()-new Date(S.atual.inicioTs).getTime())/60000);
+    const h = Math.floor(mins/60), m = mins%60;
+    document.getElementById('dash-duracao').textContent = h+'h'+(m<10?'0':'')+m;
+  }
+
+  // Registros do plantão atual
+  const regs = S.registros.filter(r=>r.plantaoTs===S.atual.inicioTs);
+  renderDashVitais(regs);
+
+  // Progresso rotina
+  if(progDiv){
+    progDiv.style.display='block';
+    const total  = (S.rotinas||[]).length;
+    const feitos = S.rotinas ? S.rotinas.filter((_,i)=>S.rotinaFeitos&&S.rotinaFeitos[i]).length : 0;
+    const pct    = total ? Math.round(feitos/total*100) : 0;
+    document.getElementById('dash-prog-txt').textContent = feitos+'/'+total;
+    const fill = document.getElementById('dash-prog-fill');
+    if(fill){
+      fill.style.width = pct+'%';
+      fill.style.background = pct===100?'#4ade80':pct>50?'#4DD4CC':'#C47A0A';
+    }
+
+    // Contadores
+    const txt = document.getElementById('dash-regs-txt');
+    if(txt){
+      const clinicos = regs.filter(r=>['glicose','pressao','temp','refeicao','medicamento','oxigenacao','peso_diurese'].includes(r.tipo));
+      txt.textContent = clinicos.length+' registro'+(clinicos.length!==1?'s':'');
+    }
+    const medTxt = document.getElementById('dash-meds-txt');
+    if(medTxt){
+      const dados    = regs.filter(r=>r.tipo==='medicamento').length;
+      const total_m  = S.remedios.length;
+      const pendente = total_m - Object.keys(S.medFeitos||{}).length;
+      medTxt.textContent = total_m>0
+        ? '💊 '+dados+'/'+total_m+(pendente>0?' · '+pendente+' pendente':'  ✅')
+        : 'Sem remédios';
+    }
+  }
+}
+
+function renderDashVitais(regs){
+  function setCard(valId, subId, lista, formatar){
+    const vEl = document.getElementById(valId);
+    const sEl = document.getElementById(subId);
+    if(!vEl||!sEl) return;
+    if(!lista.length){
+      vEl.textContent='–'; vEl.style.color='rgba(255,255,255,.4)';
+      sEl.textContent='Não aferida'; return;
+    }
+    const ult = lista[lista.length-1];
+    const {val, cor, sub} = formatar(ult);
+    vEl.textContent = val;
+    vEl.style.color = cor;
+    // Tempo desde aferição
+    const mins=Math.round((Date.now()-new Date(ult.ts).getTime())/60000);
+    const ago=mins<1?'agora':mins<60?'há '+mins+'min':mins<1440?'há '+Math.floor(mins/60)+'h':'há '+Math.floor(mins/1440)+'d';
+    sEl.textContent = sub ? sub+' · '+ago : ago;
+  }
+
+  const VERDE='#4ade80', AMARELO='#fbbf24', VERMELHO='#f87171', BRANCO='#fff';
+
+  setCard('dv-glicose','ds-glicose', regs.filter(r=>r.tipo==='glicose'),
+    g=>({val:g.valor+' mg/dL',
+         cor:g.valor<S.gMin||g.valor>S.gMax?VERMELHO:g.valor>S.gMax-20||g.valor<S.gMin+10?AMARELO:VERDE,
+         sub:g.valor<S.gMin?'⚠️ Hipoglicemia':g.valor>S.gMax?'⚠️ Hiperglicemia':g.momento}));
+
+  setCard('dv-pressao','ds-pressao', regs.filter(r=>r.tipo==='pressao'),
+    p=>({val:p.pas+'/'+p.pad,
+         cor:p.pas>S.pasMax||p.pad>S.padMax?VERMELHO:p.pas>S.pasMax-10?AMARELO:VERDE,
+         sub:(p.pas>S.pasMax||p.pad>S.padMax?'⚠️ Elevada':'Normal')+' · '+p.posicao}));
+
+  setCard('dv-temp','ds-temp', regs.filter(r=>r.tipo==='temp'),
+    t=>({val:t.valor+'°C',
+         cor:t.valor>S.tMax?VERMELHO:t.valor<S.tMin?AMARELO:VERDE,
+         sub:t.valor>S.tMax?'⚠️ Febre':t.valor<S.tMin?'⚠️ Baixa':'Normal · '+t.local}));
+
+  setCard('dv-oxig','ds-oxig', regs.filter(r=>r.tipo==='oxigenacao'),
+    o=>({val:o.valor+'%',
+         cor:o.valor<90?VERMELHO:o.valor<94?AMARELO:VERDE,
+         sub:o.valor<90?'🔴 Crítico':o.valor<94?'⚠️ Atenção':'Normal · '+o.suplementacao}));
+}
+
+
+// ═══ ESCARA / CURATIVO ═══
+function salvarEscara(){
+  const local    = getPill('pills-escara-local');
+  const estado   = getPill('pills-escara-estado');
+  const curativo = getPill('pills-escara-curativo');
+  const obs      = document.getElementById('m-escara-obs').value.trim();
+
+  addReg({tipo:'escara', local, estado, curativo, obs});
+
+  // Alerta se estado grave
+  const grave = estado.includes('Ferida') || estado.includes('necrótico') || estado.includes('Bolha');
+  const atencao = estado.includes('Hiperemia');
+
+  if(grave){
+    toast('🔴 ATENÇÃO! '+estado+' em '+local+' — comunicar família e enfermeira!');
+  } else if(atencao){
+    toast('⚠️ Hiperemia em '+local+' — monitorar de perto!');
+  } else {
+    tocarSom();
+    toast('🩹 Avaliação registrada — '+local);
+  }
+
+  // Update quick btn
+  const ql = document.getElementById('ql-escara');
+  if(ql) ql.textContent = hora2(new Date().toISOString());
+
+  document.getElementById('m-escara-obs').value='';
+  fechar('modal-escara');
+  renderAll();
+}
+
 // ═══ INIT ═══
 load();
 initRotinas();
 carregarModoNoturno();
 renderAll();
 initBateria();
+// Refresh dashboard timer every minute
+setInterval(()=>{ if(S.ativo) renderDashboard(); }, 60000);
 </script>
 
 <script>
 if('serviceWorker' in navigator){
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/cuidacare/sw.js').then(r => {
+    navigator.serviceWorker.register('sw.js').then(r => {
       console.log('CuidaCare SW registrado:', r.scope);
     }).catch(e => console.log('SW erro:', e));
   });
